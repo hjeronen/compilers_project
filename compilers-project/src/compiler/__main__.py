@@ -1,4 +1,5 @@
 import sys
+from .tokenizer import tokenize
 
 # TODO(student): add more commands as needed
 usage = f"""
@@ -41,6 +42,7 @@ def main() -> int:
 
     if command == 'interpret':
         source_code = read_source_code()
+        print(tokenize(source_code))
         ...  # TODO(student)
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
