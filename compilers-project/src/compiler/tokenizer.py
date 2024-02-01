@@ -34,7 +34,7 @@ def get_location(file: str, line: int, pos: int) -> Location:
     )
 
 
-def tokenize(source_code: str) -> list[Token]:
+def tokenize(input_file: str, source_code: str) -> list[Token]:
     pos = 0
     line = 1
     result: list[Token] = []
@@ -69,7 +69,7 @@ def tokenize(source_code: str) -> list[Token]:
             result.append(Token(
                 type='identifier',
                 text=source_code[pos:match.end()],
-                source=get_location('file', line, pos)
+                source=get_location(input_file, line, pos)
             ))
             pos = match.end()
             continue
@@ -79,7 +79,7 @@ def tokenize(source_code: str) -> list[Token]:
             result.append(Token(
                 type='integer',
                 text=source_code[pos:match.end()],
-                source=get_location('file', line, pos)
+                source=get_location(input_file, line, pos)
             ))
             pos = match.end()
             continue

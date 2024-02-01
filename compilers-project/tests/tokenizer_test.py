@@ -8,8 +8,10 @@ class AnyLocation(Location):
         return isinstance(other, Location)
 
 
+filename = 'test'
+
 location = AnyLocation(
-    file='test',
+    file=filename,
     line=0,
     column=0
 )
@@ -33,7 +35,7 @@ def test_tokenizer_basics() -> None:
             source=location
         )
     ]
-    assert tokenize('if  3\nwhile') == tokens
+    assert tokenize(filename, 'if  3\nwhile') == tokens
 
 
 def test_keywords() -> None:
@@ -64,7 +66,7 @@ def test_keywords() -> None:
             source=location
         )
     ]
-    assert tokenize('if elif else while not') == tokens
+    assert tokenize(filename, 'if elif else while not') == tokens
 
 
 def test_variable_names() -> None:
@@ -85,7 +87,7 @@ def test_variable_names() -> None:
             source=location
         )
     ]
-    assert tokenize('thisIsValid python_style variable1') == tokens
+    assert tokenize(filename, 'thisIsValid python_style variable1') == tokens
 
 
 def test_underscored_variables() -> None:
@@ -106,7 +108,7 @@ def test_underscored_variables() -> None:
             source=location
         )
     ]
-    assert tokenize('_one __two __multiple_underscores') == tokens
+    assert tokenize(filename, '_one __two __multiple_underscores') == tokens
 
 
 def test_positive_integers() -> None:
@@ -127,8 +129,8 @@ def test_positive_integers() -> None:
             source=location
         )
     ]
-    assert tokenize('1 23 -95') == tokens
+    assert tokenize(filename, '1 23 -95') == tokens
 
 
 def test_empty_returns_nothing() -> None:
-    assert tokenize('') == []
+    assert tokenize(filename, '') == []

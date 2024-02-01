@@ -42,9 +42,10 @@ def main() -> int:
 
     if command == 'interpret':
         source_code = read_source_code()
-        tokens = tokenize(source_code)
-        for token in tokens:
-            print(token)
+        if input_file:
+            tokens = tokenize(input_file, source_code)
+            for token in tokens:
+                print(token)
         ...  # TODO(student)
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
