@@ -44,6 +44,10 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
     # keyword = r'if|elif|else|while|not'
     identifier = r'[a-zA-Z_]+[a-zA-Z0-9_]*'
     integer = r'[0-9]+'
+    operator = r'\+|\-|\*|/|\=\=|\!\=|\<\=|\>\=|\=|\<|\>'
+    punctuation = r'\(|\)|\[|\]|\{|\}|\,|\:|\;'
+    comment_oneline = r'(#+|//+).*\n+'
+    comment_multiline = r'/\*[^*/]*\*/'
 
     while pos < len(source_code):
 
@@ -56,6 +60,16 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
         if match is not None:
             pos = match.end()
             line += 1
+            continue
+
+        match = match_re(comment_oneline, source_code, pos)
+        if match is not None:
+            pos = match.end()
+            continue
+
+        match = match_re(comment_multiline, source_code, pos)
+        if match is not None:
+            pos = match.end()
             continue
 
         # match = match_re(keyword, source_code, pos)
@@ -78,6 +92,26 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
         if match is not None:
             result.append(Token(
                 type='integer',
+                text=source_code[pos:match.end()],
+                source=get_location(input_file, line, pos)
+            ))
+            pos = match.end()
+            continue
+
+        match = match_re(operator, source_code, pos)
+        if match is not None:
+            result.append(Token(
+                type='operator',
+                text=source_code[pos:match.end()],
+                source=get_location(input_file, line, pos)
+            ))
+            pos = match.end()
+            continue
+
+        match = match_re(punctuation, source_code, pos)
+        if match is not None:
+            result.append(Token(
+                type='punctuation',
                 text=source_code[pos:match.end()],
                 source=get_location(input_file, line, pos)
             ))

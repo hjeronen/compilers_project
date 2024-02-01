@@ -124,12 +124,210 @@ def test_positive_integers() -> None:
             source=location
         ),
         Token(
+            text='-',
+            type='operator',
+            source=location
+        ),
+        Token(
             text='95',  # do not accept '-' as part of integer
             type='integer',
             source=location
         )
     ]
     assert tokenize(filename, '1 23 -95') == tokens
+
+
+def test_operators() -> None:
+    tokens = [
+        Token(
+            text='<',
+            type='operator',
+            source=location
+        ),
+        Token(
+            text='<=',
+            type='operator',
+            source=location
+        ),
+        Token(
+            text='>',
+            type='operator',
+            source=location
+        ),
+        Token(
+            text='!=',
+            type='operator',
+            source=location
+        ),
+        Token(
+            text='/',
+            type='operator',
+            source=location
+        ),
+        Token(
+            text='+',
+            type='operator',
+            source=location
+        ),
+        Token(
+            text='*',
+            type='operator',
+            source=location
+        )
+    ]
+    assert tokenize(filename, '< <= > != / + *') == tokens
+
+
+def test_punctuation() -> None:
+    tokens = [
+        Token(
+            text='(',
+            type='punctuation',
+            source=location
+        ),
+        Token(
+            text=')',
+            type='punctuation',
+            source=location
+        ),
+        Token(
+            text=',',
+            type='punctuation',
+            source=location
+        ),
+        Token(
+            text=';',
+            type='punctuation',
+            source=location
+        )
+    ]
+    assert tokenize(filename, '() , ;') == tokens
+
+
+def test_comment_oneline_java() -> None:
+    tokens = [
+        Token(
+            text='if',
+            type='identifier',
+            source=location
+        ),
+        Token(
+            text='(',
+            type='punctuation',
+            source=location
+        ),
+        Token(
+            text='true',
+            type='identifier',
+            source=location
+        ),
+        Token(
+            text=')',
+            type='punctuation',
+            source=location
+        ),
+        Token(
+            text='{',
+            type='punctuation',
+            source=location
+        ),
+        Token(
+            text='return',
+            type='identifier',
+            source=location
+        ),
+        Token(
+            text='a',
+            type='identifier',
+            source=location
+        ),
+        Token(
+            text='}',
+            type='punctuation',
+            source=location
+        )
+    ]
+
+    code = 'if (true) {\n// comment ignored!\nreturn a\n}'
+
+    assert tokenize(filename, code) == tokens
+
+
+def test_comment_oneline_python() -> None:
+    tokens = [
+        Token(
+            text='if',
+            type='identifier',
+            source=location
+        ),
+        Token(
+            text='True',
+            type='identifier',
+            source=location
+        ),
+        Token(
+            text=':',
+            type='punctuation',
+            source=location
+        ),
+        Token(
+            text='return',
+            type='identifier',
+            source=location
+        ),
+        Token(
+            text='a',
+            type='identifier',
+            source=location
+        )
+    ]
+
+    code = 'if True:\n# comment ignored!\nreturn a\n'
+
+    assert tokenize(filename, code) == tokens
+
+
+def test_comment_multiline() -> None:
+    tokens = [
+        Token(
+            text='print_int',
+            type='identifier',
+            source=location
+        ),
+        Token(
+            text='(',
+            type='punctuation',
+            source=location
+        ),
+        Token(
+            text='123',
+            type='integer',
+            source=location
+        ),
+        Token(
+            text=')',
+            type='punctuation',
+            source=location
+        )
+    ]
+
+    code = '/*\nMany lines\nof comment\ntext.\n*/\nprint_int(123)\n/* Another\ncomment. */'
+
+    assert tokenize(filename, code) == tokens
+
+
+def test_locations_are_equal() -> None:
+    one = Location(
+        file=filename,
+        line=2,
+        column=3
+    )
+    two = AnyLocation(
+        file=filename,
+        line=0,
+        column=0
+    )
+    assert one == two
 
 
 def test_empty_returns_nothing() -> None:
