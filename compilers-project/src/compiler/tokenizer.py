@@ -4,7 +4,7 @@ from typing import Literal, Match
 import math
 
 
-TokenType = Literal['integer', 'operator', 'punctuation', 'identifier']
+TokenType = Literal['integer', 'operator', 'punctuation', 'identifier', 'end']
 
 
 @dataclass
@@ -15,10 +15,16 @@ class Location:
 
 
 @dataclass
+class AnyLocation(Location):
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Location)
+
+
+@dataclass
 class Token:
     text: str
     type: TokenType
-    source: Location
+    location: Location
 
 
 def match_re(regex: str, input: str, position: int) -> Match | None:
@@ -83,7 +89,7 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
             result.append(Token(
                 type='identifier',
                 text=source_code[pos:match.end()],
-                source=get_location(input_file, line, pos)
+                location=get_location(input_file, line, pos)
             ))
             pos = match.end()
             continue
@@ -93,7 +99,7 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
             result.append(Token(
                 type='integer',
                 text=source_code[pos:match.end()],
-                source=get_location(input_file, line, pos)
+                location=get_location(input_file, line, pos)
             ))
             pos = match.end()
             continue
@@ -103,7 +109,7 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
             result.append(Token(
                 type='operator',
                 text=source_code[pos:match.end()],
-                source=get_location(input_file, line, pos)
+                location=get_location(input_file, line, pos)
             ))
             pos = match.end()
             continue
@@ -113,7 +119,7 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
             result.append(Token(
                 type='punctuation',
                 text=source_code[pos:match.end()],
-                source=get_location(input_file, line, pos)
+                location=get_location(input_file, line, pos)
             ))
             pos = match.end()
             continue

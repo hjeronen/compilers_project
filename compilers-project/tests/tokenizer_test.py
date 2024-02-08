@@ -1,11 +1,4 @@
-from dataclasses import dataclass
-from compiler.tokenizer import tokenize, Location, Token
-
-
-@dataclass
-class AnyLocation(Location):
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, Location)
+from compiler.tokenizer import tokenize, Location, AnyLocation, Token
 
 
 filename = 'test'
@@ -22,17 +15,17 @@ def test_tokenizer_basics() -> None:
         Token(
             text='if',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='3',
             type='integer',
-            source=location
+            location=location
         ),
         Token(
             text='while',
             type='identifier',
-            source=location
+            location=location
         )
     ]
     assert tokenize(filename, 'if  3\nwhile') == tokens
@@ -43,27 +36,27 @@ def test_keywords() -> None:
         Token(
             text='if',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='elif',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='else',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='while',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='not',
             type='identifier',
-            source=location
+            location=location
         )
     ]
     assert tokenize(filename, 'if elif else while not') == tokens
@@ -74,17 +67,17 @@ def test_variable_names() -> None:
         Token(
             text='thisIsValid',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='python_style',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='variable1',
             type='identifier',
-            source=location
+            location=location
         )
     ]
     assert tokenize(filename, 'thisIsValid python_style variable1') == tokens
@@ -95,17 +88,17 @@ def test_underscored_variables() -> None:
         Token(
             text='_one',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='__two',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='__multiple_underscores',
             type='identifier',
-            source=location
+            location=location
         )
     ]
     assert tokenize(filename, '_one __two __multiple_underscores') == tokens
@@ -116,22 +109,22 @@ def test_positive_integers() -> None:
         Token(
             text='1',
             type='integer',
-            source=location
+            location=location
         ),
         Token(
             text='23',
             type='integer',
-            source=location
+            location=location
         ),
         Token(
             text='-',
             type='operator',
-            source=location
+            location=location
         ),
         Token(
             text='95',  # do not accept '-' as part of integer
             type='integer',
-            source=location
+            location=location
         )
     ]
     assert tokenize(filename, '1 23 -95') == tokens
@@ -142,37 +135,37 @@ def test_operators() -> None:
         Token(
             text='<',
             type='operator',
-            source=location
+            location=location
         ),
         Token(
             text='<=',
             type='operator',
-            source=location
+            location=location
         ),
         Token(
             text='>',
             type='operator',
-            source=location
+            location=location
         ),
         Token(
             text='!=',
             type='operator',
-            source=location
+            location=location
         ),
         Token(
             text='/',
             type='operator',
-            source=location
+            location=location
         ),
         Token(
             text='+',
             type='operator',
-            source=location
+            location=location
         ),
         Token(
             text='*',
             type='operator',
-            source=location
+            location=location
         )
     ]
     assert tokenize(filename, '< <= > != / + *') == tokens
@@ -183,22 +176,22 @@ def test_punctuation() -> None:
         Token(
             text='(',
             type='punctuation',
-            source=location
+            location=location
         ),
         Token(
             text=')',
             type='punctuation',
-            source=location
+            location=location
         ),
         Token(
             text=',',
             type='punctuation',
-            source=location
+            location=location
         ),
         Token(
             text=';',
             type='punctuation',
-            source=location
+            location=location
         )
     ]
     assert tokenize(filename, '() , ;') == tokens
@@ -209,42 +202,42 @@ def test_comment_oneline_java() -> None:
         Token(
             text='if',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='(',
             type='punctuation',
-            source=location
+            location=location
         ),
         Token(
             text='true',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text=')',
             type='punctuation',
-            source=location
+            location=location
         ),
         Token(
             text='{',
             type='punctuation',
-            source=location
+            location=location
         ),
         Token(
             text='return',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='a',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='}',
             type='punctuation',
-            source=location
+            location=location
         )
     ]
 
@@ -258,27 +251,27 @@ def test_comment_oneline_python() -> None:
         Token(
             text='if',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='True',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text=':',
             type='punctuation',
-            source=location
+            location=location
         ),
         Token(
             text='return',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='a',
             type='identifier',
-            source=location
+            location=location
         )
     ]
 
@@ -292,22 +285,22 @@ def test_comment_multiline() -> None:
         Token(
             text='print_int',
             type='identifier',
-            source=location
+            location=location
         ),
         Token(
             text='(',
             type='punctuation',
-            source=location
+            location=location
         ),
         Token(
             text='123',
             type='integer',
-            source=location
+            location=location
         ),
         Token(
             text=')',
             type='punctuation',
-            source=location
+            location=location
         )
     ]
 

@@ -1,4 +1,4 @@
 *.pyc
 __pycache__
 /.mypy_cache
-playground.py
+playground*.py
