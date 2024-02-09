@@ -5,7 +5,10 @@ import compiler.ast as ast
 # Define a set of parsing functions to parse different kinds of AST subtrees.
 
 
-def parse(tokens: list[Token]) -> ast.Expression:
+def parse(tokens: list[Token]) -> ast.Expression | None:
+    if len(tokens) == 0:
+        return None
+
     pos = 0
 
     def peek() -> Token:
@@ -85,11 +88,12 @@ def parse(tokens: list[Token]) -> ast.Expression:
 
         while peek().text in ['+', '-']:
             operator_token = consume()
+            operator = operator_token.text
             right = parse_term()
 
             left = ast.BinaryOp(
                 left,
-                operator_token.text,
+                operator,
                 right
             )
 
@@ -100,13 +104,19 @@ def parse(tokens: list[Token]) -> ast.Expression:
 
         if peek().text in ['+', '-']:
             operator_token = consume()
+            operator = operator_token.text
             right = parse_expression_right()
             return ast.BinaryOp(
                 left,
-                operator_token.text,
+                operator,
                 right
             )
 
         return left
 
-    return parse_expression()
+    result = parse_expression()
+
+    if pos < len(tokens):
+        raise Exception(f'Unexpected token: {tokens[pos]}')
+
+    return result

@@ -1,5 +1,6 @@
 import sys
 from .tokenizer import tokenize
+from .parser import parse
 
 # TODO(student): add more commands as needed
 usage = f"""
@@ -46,6 +47,8 @@ def main() -> int:
             tokens = tokenize(input_file, source_code)
             for token in tokens:
                 print(token)
+            tree = parse(tokens)
+            print(tree)
         ...  # TODO(student)
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
