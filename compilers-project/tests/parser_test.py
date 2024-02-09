@@ -126,3 +126,55 @@ def test_missing_closing_parenthesis_raises_exception() -> None:
 
     error = f'{unexpected.location}: expected ")"'
     assert str(exec_info.value) == error
+
+
+def test_missing_term_raises_exception() -> None:
+    input = tokenize('test', '5 - 2 +')
+    unexpected = input[3]
+
+    with pytest.raises(Exception) as exec_info:
+        parse(input)
+
+    error = f'{unexpected.location}: expected an integer or an identifier'
+    assert str(exec_info.value) == error
+
+
+def test_consecutive_operators_raises_exception() -> None:
+    input = tokenize('test', '5 - + 2')
+    unexpected = input[2]
+
+    with pytest.raises(Exception) as exec_info:
+        parse(input)
+
+    error = f'{unexpected.location}: expected an integer or an identifier'
+    assert str(exec_info.value) == error
+
+
+def test_multiply_operator_precedence() -> None:
+    input = tokenize('test', 'a - 7 * 2')
+    expected = ast.BinaryOp(
+        left=ast.Identifier(name='a'),
+        op='-',
+        right=ast.BinaryOp(
+            left=ast.Literal(value=7),
+            op='*',
+            right=ast.Literal(value=2)
+        )
+    )
+
+    assert parse(input) == expected
+
+
+def test_division_operator_precedence() -> None:
+    input = tokenize('test', 'a - 7 / 2')
+    expected = ast.BinaryOp(
+        left=ast.Identifier(name='a'),
+        op='-',
+        right=ast.BinaryOp(
+            left=ast.Literal(value=7),
+            op='/',
+            right=ast.Literal(value=2)
+        )
+    )
+
+    assert parse(input) == expected
