@@ -4,7 +4,8 @@ from typing import Literal, Match
 import math
 
 
-TokenType = Literal['integer', 'operator', 'punctuation', 'identifier', 'end']
+TokenType = Literal['integer', 'operator', 'bool_literal',
+                    'null_literal', 'unary_op', 'punctuation', 'identifier', 'keyword', 'end']
 
 
 @dataclass
@@ -47,7 +48,10 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
 
     whitespace = r'\s+'
     newline = r'\n+'
-    # keyword = r'if|elif|else|while|not'
+    keyword = r'if|then|elif|else|while|return'
+    bool_literal = r'[Tt]rue|[Ff]alse'
+    null_literal = r'None|null'
+    unary_op = r'[Nn]ot'
     identifier = r'[a-zA-Z_]+[a-zA-Z0-9_]*'
     integer = r'[0-9]+'
     operator = r'\+|\-|\*|/|\=\=|\!\=|\<\=|\>\=|\=|\<|\>'
@@ -78,11 +82,45 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
             pos = match.end()
             continue
 
-        # match = match_re(keyword, source_code, pos)
-        # if match is not None:
-        #     result.append(source_code[pos:match.end()])
-        #     pos = match.end()
-        #     continue
+        match = match_re(keyword, source_code, pos)
+        if match is not None:
+            result.append(Token(
+                type='keyword',
+                text=source_code[pos:match.end()],
+                location=get_location(input_file, line, pos)
+            ))
+            pos = match.end()
+            continue
+
+        match = match_re(bool_literal, source_code, pos)
+        if match is not None:
+            result.append(Token(
+                type='bool_literal',
+                text=source_code[pos:match.end()],
+                location=get_location(input_file, line, pos)
+            ))
+            pos = match.end()
+            continue
+
+        match = match_re(null_literal, source_code, pos)
+        if match is not None:
+            result.append(Token(
+                type='null_literal',
+                text=source_code[pos:match.end()],
+                location=get_location(input_file, line, pos)
+            ))
+            pos = match.end()
+            continue
+
+        match = match_re(unary_op, source_code, pos)
+        if match is not None:
+            result.append(Token(
+                type='unary_op',
+                text=source_code[pos:match.end()],
+                location=get_location(input_file, line, pos)
+            ))
+            pos = match.end()
+            continue
 
         match = match_re(identifier, source_code, pos)
         if match is not None:

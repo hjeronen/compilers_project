@@ -49,6 +49,34 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
         token = consume()
         return ast.Identifier(name=token.text)
 
+    def parse_bool_literal() -> ast.Literal:
+        if peek().type != 'bool_literal':
+            raise Exception(f'{peek().location}: expected a boolean value')
+
+        token = consume()
+        if token.text == 'true' or token.text == 'True':
+            return ast.Literal(value=True)
+
+        if token.text == 'false' or token.text == 'False':
+            return ast.Literal(value=False)
+
+        raise Exception(
+            f'{token.location}: expected boolean true/True or false/False')
+
+    def parse_if_statement() -> ast.Expression:
+        condition = parse_expression()
+        true_branch = parse_expression()
+        false_branch = None
+
+        if peek().type == 'keyword':
+            false_branch = parse_expression()
+
+        return ast.IfStatement(
+            condition,
+            true_branch,
+            false_branch
+        )
+
     def parse_factor() -> ast.Expression:
         if peek().text == '(':
             return parse_parenthesized()
@@ -58,6 +86,19 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
 
         if peek().type == 'identifier':
             return parse_identifier()
+
+        if peek().type == 'bool_literal':
+            return parse_bool_literal()
+
+        if peek().type == 'keyword':
+            text = peek().text
+            if text == 'then' or text == 'else':
+                consume(['then', 'else'])
+                return parse_expression()
+
+            if text == 'if':
+                consume('if')
+                return parse_if_statement()
 
         raise Exception(
             f'{peek().location}: expected an integer or an identifier')

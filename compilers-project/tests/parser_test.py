@@ -13,6 +13,11 @@ location = AnyLocation(
 )
 
 
+def test_single_literal() -> None:
+    input = tokenize('test', '11')
+    assert parse(input) == ast.Literal(11)
+
+
 def test_binary_op() -> None:
     input = tokenize('test', '55 + 7')
     expected = ast.BinaryOp(
@@ -178,3 +183,68 @@ def test_division_operator_precedence() -> None:
     )
 
     assert parse(input) == expected
+
+
+def test_if_statement() -> None:
+    input = tokenize('test', 'if a then b + c else x * y')
+    expected = ast.IfStatement(
+        condition=ast.Identifier(name='a'),
+        true_branch=ast.BinaryOp(
+            left=ast.Identifier(name='b'),
+            op='+',
+            right=ast.Identifier(name='c')
+        ),
+        false_branch=ast.BinaryOp(
+            left=ast.Identifier(name='x'),
+            op='*',
+            right=ast.Identifier(name='y')
+        )
+    )
+
+    assert parse(input) == expected
+
+
+def test_if_statement_without_else() -> None:
+    input = tokenize('test', 'if a then b + c')
+    expected = ast.IfStatement(
+        condition=ast.Identifier(name='a'),
+        true_branch=ast.BinaryOp(
+            left=ast.Identifier(name='b'),
+            op='+',
+            right=ast.Identifier(name='c')
+        ),
+        false_branch=None
+    )
+
+    assert parse(input) == expected
+
+
+def test_if_as_sub_statement() -> None:
+    input = tokenize('test', '1 + if true then 2 else 3')
+    expected = ast.BinaryOp(
+        left=ast.Literal(value=1),
+        op='+',
+        right=ast.IfStatement(
+            condition=ast.Literal(value=True),
+            true_branch=ast.Literal(value=2),
+            false_branch=ast.Literal(value=3)
+        )
+    )
+
+    assert parse(input) == expected
+
+
+# Will be added in Task 4
+# def test_comparison_operator() -> None:
+#     input = tokenize('test', '1 < 2 + 3')
+#     expected = ast.BinaryOp(
+#         left=ast.Literal(value=1),
+#         op='<',
+#         right=ast.BinaryOp(
+#             left=ast.Literal(value=2),
+#             op='+',
+#             right=ast.Literal(value=3)
+#         )
+#     )
+
+#     assert parse(input) == expected

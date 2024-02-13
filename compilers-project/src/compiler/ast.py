@@ -25,4 +25,12 @@ class BinaryOp(Expression):
     right: Expression
 
 
+@dataclass
+class IfStatement(Expression):
+    """AST node for conditional statements"""
+    condition: Expression
+    true_branch: Expression
+    false_branch: Expression | None
+
+
 ...  # You get to define more later

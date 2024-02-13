@@ -14,7 +14,7 @@ def test_tokenizer_basics() -> None:
     tokens = [
         Token(
             text='if',
-            type='identifier',
+            type='keyword',
             location=location
         ),
         Token(
@@ -24,7 +24,7 @@ def test_tokenizer_basics() -> None:
         ),
         Token(
             text='while',
-            type='identifier',
+            type='keyword',
             location=location
         )
     ]
@@ -35,31 +35,47 @@ def test_keywords() -> None:
     tokens = [
         Token(
             text='if',
-            type='identifier',
+            type='keyword',
+            location=location
+        ),
+        Token(
+            text='then',
+            type='keyword',
             location=location
         ),
         Token(
             text='elif',
-            type='identifier',
+            type='keyword',
             location=location
         ),
         Token(
             text='else',
-            type='identifier',
+            type='keyword',
             location=location
         ),
         Token(
             text='while',
-            type='identifier',
-            location=location
-        ),
-        Token(
-            text='not',
-            type='identifier',
+            type='keyword',
             location=location
         )
     ]
-    assert tokenize(filename, 'if elif else while not') == tokens
+    assert tokenize(filename, 'if then elif else while') == tokens
+
+
+def test_others() -> None:
+    tokens = [
+        Token(
+            text='True',
+            type='bool_literal',
+            location=location
+        ),
+        Token(
+            text='None',
+            type='null_literal',
+            location=location
+        )
+    ]
+    assert tokenize(filename, 'True None') == tokens
 
 
 def test_variable_names() -> None:
@@ -201,7 +217,7 @@ def test_comment_oneline_java() -> None:
     tokens = [
         Token(
             text='if',
-            type='identifier',
+            type='keyword',
             location=location
         ),
         Token(
@@ -211,7 +227,7 @@ def test_comment_oneline_java() -> None:
         ),
         Token(
             text='true',
-            type='identifier',
+            type='bool_literal',
             location=location
         ),
         Token(
@@ -226,7 +242,7 @@ def test_comment_oneline_java() -> None:
         ),
         Token(
             text='return',
-            type='identifier',
+            type='keyword',
             location=location
         ),
         Token(
@@ -250,12 +266,12 @@ def test_comment_oneline_python() -> None:
     tokens = [
         Token(
             text='if',
-            type='identifier',
+            type='keyword',
             location=location
         ),
         Token(
             text='True',
-            type='identifier',
+            type='bool_literal',
             location=location
         ),
         Token(
@@ -265,7 +281,7 @@ def test_comment_oneline_python() -> None:
         ),
         Token(
             text='return',
-            type='identifier',
+            type='keyword',
             location=location
         ),
         Token(
