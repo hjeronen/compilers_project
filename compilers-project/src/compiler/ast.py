@@ -33,4 +33,11 @@ class IfStatement(Expression):
     false_branch: Expression | None
 
 
+@dataclass
+class FunctionCall(Expression):
+    """AST node for function calls"""
+    name: Expression | None
+    args: list[Expression]
+
+
 ...  # You get to define more later

@@ -64,18 +64,38 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             f'{token.location}: expected boolean true/True or false/False')
 
     def parse_if_statement() -> ast.Expression:
+        consume('if')
         condition = parse_expression()
+        consume('then')
         true_branch = parse_expression()
-        false_branch = None
 
-        if peek().type == 'keyword':
+        if peek().text == 'else':
+            consume('else')
             false_branch = parse_expression()
+        else:
+            false_branch = None
 
         return ast.IfStatement(
             condition,
             true_branch,
             false_branch
         )
+
+    def parse_function_call() -> ast.FunctionCall:
+        consume('(')
+        f = ast.FunctionCall(
+            name=None,
+            args=[]
+        )
+
+        while peek().text != ')':
+            if peek().text == ',':
+                consume(',')
+
+            f.args.append(parse_expression())
+
+        consume(')')
+        return f
 
     def parse_factor() -> ast.Expression:
         if peek().text == '(':
@@ -90,15 +110,8 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
         if peek().type == 'bool_literal':
             return parse_bool_literal()
 
-        if peek().type == 'keyword':
-            text = peek().text
-            if text == 'then' or text == 'else':
-                consume(['then', 'else'])
-                return parse_expression()
-
-            if text == 'if':
-                consume('if')
-                return parse_if_statement()
+        if peek().text == 'if':
+            return parse_if_statement()
 
         raise Exception(
             f'{peek().location}: expected an integer or an identifier')
@@ -126,6 +139,11 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
 
     def parse_expression() -> ast.Expression:
         left = parse_term()
+
+        if peek().text == '(':
+            f = parse_function_call()
+            f.name = left
+            return f
 
         while peek().text in ['+', '-']:
             operator_token = consume()
