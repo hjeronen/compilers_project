@@ -150,22 +150,22 @@ def test_operators() -> None:
     tokens = [
         Token(
             text='<',
-            type='operator',
+            type='comp_operator',
             location=location
         ),
         Token(
             text='<=',
-            type='operator',
+            type='comp_operator',
             location=location
         ),
         Token(
             text='>',
-            type='operator',
+            type='comp_operator',
             location=location
         ),
         Token(
             text='!=',
-            type='operator',
+            type='comp_operator',
             location=location
         ),
         Token(
@@ -182,9 +182,35 @@ def test_operators() -> None:
             text='*',
             type='operator',
             location=location
+        ),
+        Token(
+            text='=',
+            type='assignment',
+            location=location
         )
     ]
-    assert tokenize(filename, '< <= > != / + *') == tokens
+    assert tokenize(filename, '< <= > != / + * =') == tokens
+
+
+def test_remainder() -> None:
+    tokens = [
+        Token(
+            text='4',
+            type='integer',
+            location=location
+        ),
+        Token(
+            text='%',
+            type='operator',
+            location=location
+        ),
+        Token(
+            text='2',
+            type='integer',
+            location=location
+        )
+    ]
+    assert tokenize(filename, '4 % 2') == tokens
 
 
 def test_punctuation() -> None:

@@ -4,7 +4,7 @@ from typing import Literal, Match
 import math
 
 
-TokenType = Literal['integer', 'operator', 'bool_literal',
+TokenType = Literal['integer', 'operator', 'comp_operator', 'assignment', 'bool_literal', 'bool_operator',
                     'null_literal', 'unary_op', 'punctuation', 'identifier', 'keyword', 'end']
 
 
@@ -46,15 +46,32 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
     line = 1
     result: list[Token] = []
 
+    def check_regex(regex: str, type: TokenType, source_code: str, input_file: str, line: int, result: list[Token]) -> bool:
+        nonlocal pos
+        match = match_re(regex, source_code, pos)
+        if match is not None:
+            result.append(Token(
+                type=type,
+                text=source_code[pos:match.end()],
+                location=get_location(input_file, line, pos)
+            ))
+            pos = match.end()
+            return True
+
+        return False
+
     whitespace = r'\s+'
     newline = r'\n+'
     keyword = r'if|then|elif|else|while|return'
     bool_literal = r'[Tt]rue|[Ff]alse'
+    bool_operator = r'and|or'
     null_literal = r'None|null'
     unary_op = r'[Nn]ot'
     identifier = r'[a-zA-Z_]+[a-zA-Z0-9_]*'
     integer = r'[0-9]+'
-    operator = r'\+|\-|\*|/|\=\=|\!\=|\<\=|\>\=|\=|\<|\>'
+    operator = r'\+|\-|\*|\/|\%'
+    comp_operator = r'\=\=|\!\=|\<\=|\>\=|\<|\>'
+    assignment = r'\='
     punctuation = r'\(|\)|\[|\]|\{|\}|\,|\:|\;'
     comment_oneline = r'(#+|//+).*\n+'
     comment_multiline = r'/\*[^*/]*\*/'
@@ -82,84 +99,48 @@ def tokenize(input_file: str, source_code: str) -> list[Token]:
             pos = match.end()
             continue
 
-        match = match_re(keyword, source_code, pos)
-        if match is not None:
-            result.append(Token(
-                type='keyword',
-                text=source_code[pos:match.end()],
-                location=get_location(input_file, line, pos)
-            ))
-            pos = match.end()
+        if check_regex(keyword, 'keyword', source_code,
+                       input_file, line, result):
             continue
 
-        match = match_re(bool_literal, source_code, pos)
-        if match is not None:
-            result.append(Token(
-                type='bool_literal',
-                text=source_code[pos:match.end()],
-                location=get_location(input_file, line, pos)
-            ))
-            pos = match.end()
+        if check_regex(bool_literal, 'bool_literal', source_code,
+                       input_file, line, result):
             continue
 
-        match = match_re(null_literal, source_code, pos)
-        if match is not None:
-            result.append(Token(
-                type='null_literal',
-                text=source_code[pos:match.end()],
-                location=get_location(input_file, line, pos)
-            ))
-            pos = match.end()
+        if check_regex(bool_operator, 'bool_operator', source_code,
+                       input_file, line, result):
             continue
 
-        match = match_re(unary_op, source_code, pos)
-        if match is not None:
-            result.append(Token(
-                type='unary_op',
-                text=source_code[pos:match.end()],
-                location=get_location(input_file, line, pos)
-            ))
-            pos = match.end()
+        if check_regex(null_literal, 'null_literal', source_code,
+                       input_file, line, result):
             continue
 
-        match = match_re(identifier, source_code, pos)
-        if match is not None:
-            result.append(Token(
-                type='identifier',
-                text=source_code[pos:match.end()],
-                location=get_location(input_file, line, pos)
-            ))
-            pos = match.end()
+        if check_regex(unary_op, 'unary_op', source_code,
+                       input_file, line, result):
             continue
 
-        match = match_re(integer, source_code, pos)
-        if match is not None:
-            result.append(Token(
-                type='integer',
-                text=source_code[pos:match.end()],
-                location=get_location(input_file, line, pos)
-            ))
-            pos = match.end()
+        if check_regex(identifier, 'identifier', source_code,
+                       input_file, line, result):
             continue
 
-        match = match_re(operator, source_code, pos)
-        if match is not None:
-            result.append(Token(
-                type='operator',
-                text=source_code[pos:match.end()],
-                location=get_location(input_file, line, pos)
-            ))
-            pos = match.end()
+        if check_regex(integer, 'integer', source_code,
+                       input_file, line, result):
             continue
 
-        match = match_re(punctuation, source_code, pos)
-        if match is not None:
-            result.append(Token(
-                type='punctuation',
-                text=source_code[pos:match.end()],
-                location=get_location(input_file, line, pos)
-            ))
-            pos = match.end()
+        if check_regex(operator, 'operator', source_code,
+                       input_file, line, result):
+            continue
+
+        if check_regex(comp_operator, 'comp_operator', source_code,
+                       input_file, line, result):
+            continue
+
+        if check_regex(assignment, 'assignment', source_code,
+                       input_file, line, result):
+            continue
+
+        if check_regex(punctuation, 'punctuation', source_code,
+                       input_file, line, result):
             continue
 
         pos += 1

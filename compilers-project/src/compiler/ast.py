@@ -26,6 +26,13 @@ class BinaryOp(Expression):
 
 
 @dataclass
+class UnaryOp(Expression):
+    """AST node for an unary operation like `- B` or `not B`"""
+    op: str
+    expr: Expression
+
+
+@dataclass
 class IfStatement(Expression):
     """AST node for conditional statements"""
     condition: Expression
