@@ -81,6 +81,18 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             false_branch
         )
 
+    def parse_while_loop() -> ast.WhileLoop:
+        consume('while')
+        condition = parse_expression()
+
+        consume('do')
+        body = parse_expression()
+
+        return ast.WhileLoop(
+            condition,
+            body
+        )
+
     def parse_function_call() -> ast.FunctionCall:
         consume('(')
         f = ast.FunctionCall(
@@ -97,9 +109,33 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
         consume(')')
         return f
 
+    def parse_block() -> ast.Block:
+        consume('{')
+        block = ast.Block(
+            statements=[]
+        )
+
+        while peek().text != '}':
+            if peek().type == 'end':
+                raise Exception(f'{peek().location}: expected a "}}"')
+
+            block.statements.append(parse_expression())
+            if peek().text == ';':
+                consume(';')
+                if peek().text == '}':
+                    block.statements.append(ast.Literal(value=None))
+            elif peek().text != '}':
+                raise Exception(f'{peek().location}: expected ";" or "}}"')
+
+        consume('}')
+        return block
+
     def parse_factor() -> ast.Expression:
         if peek().text == '(':
             return parse_parenthesized()
+
+        if peek().text == '{':
+            return parse_block()
 
         if peek().type == 'integer':
             return parse_int_literal()
@@ -113,14 +149,18 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
 
             return identifier
 
+        if peek().type == 'keyword':
+            if peek().text == 'if':
+                return parse_if_statement()
+
+            if peek().text == 'while':
+                return parse_while_loop()
+
         if peek().type == 'bool_literal':
             return parse_bool_literal()
 
         if peek().text in ['-', 'not']:
             return parse_unary_op()
-
-        if peek().text == 'if':
-            return parse_if_statement()
 
         raise Exception(
             f'{peek().location}: expected an integer, an identifier, a boolean literal or if')

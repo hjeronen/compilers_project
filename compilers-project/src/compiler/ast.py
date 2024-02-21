@@ -47,4 +47,17 @@ class FunctionCall(Expression):
     args: list[Expression]
 
 
+@dataclass
+class WhileLoop(Expression):
+    """AST node for function calls"""
+    condition: Expression
+    body: Expression
+
+
+@dataclass
+class Block(Expression):
+    """AST node for {} blocks"""
+    statements: list[Expression]
+
+
 ...  # You get to define more later
