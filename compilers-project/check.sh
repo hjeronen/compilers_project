@@ -10,6 +10,11 @@ if [ "$#" -eq 1 ]; then
     TEST_FILE=$1
     echo "Running specified test file: $TEST_FILE"
     poetry run pytest -vv tests/$TEST_FILE
+elif [ "$#" -eq 2 ]; then
+    TEST_FILE=$1
+    TEST_CASE=$2
+    echo "Running specified test case: $TEST_CASE"
+    poetry run pytest -vv -k $TEST_CASE
 else
     echo "Running all tests"
     poetry run pytest -vv tests/

@@ -1,2 +1,2 @@
 # if a <= bee then print_int(123)
-{ x = y; f(y) f(x) }
+{ var a = 0 }

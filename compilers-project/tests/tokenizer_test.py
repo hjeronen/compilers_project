@@ -57,9 +57,14 @@ def test_keywords() -> None:
             text='while',
             type='keyword',
             location=location
+        ),
+        Token(
+            text='var',
+            type='keyword',
+            location=location
         )
     ]
-    assert tokenize(filename, 'if then elif else while') == tokens
+    assert tokenize(filename, 'if then elif else while var') == tokens
 
 
 def test_others() -> None:

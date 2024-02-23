@@ -60,4 +60,9 @@ class Block(Expression):
     statements: list[Expression]
 
 
+@dataclass
+class VarDeclaration(Expression):
+    initialize: Expression
+
+
 ...  # You get to define more later

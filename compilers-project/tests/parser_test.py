@@ -125,7 +125,7 @@ def test_missing_term_raises_exception() -> None:
     with pytest.raises(Exception) as excep_info:
         parse(input)
 
-    error = f'{unexpected.location}: expected an integer, an identifier, a boolean literal or if'
+    error = f'{unexpected.location}: expected integer, identifier, keyword, boolean literal or unary operator'
     assert str(excep_info.value) == error
 
 
@@ -136,7 +136,7 @@ def test_consecutive_operators_raises_exception() -> None:
     with pytest.raises(Exception) as excep_info:
         parse(input)
 
-    error = f'{unexpected.location}: expected an integer, an identifier, a boolean literal or if'
+    error = f'{unexpected.location}: expected integer, identifier, keyword, boolean literal or unary operator'
     assert str(excep_info.value) == error
 
 
@@ -676,4 +676,43 @@ def test_missing_semicolon_raises_exception() -> None:
         parse(input)
 
     error = f'{unexpected.location}: expected ";" or "}}"'
+    assert str(excep_info.value) == error
+
+
+def test_parsing_variable_declaration() -> None:
+    input = tokenize('test', '{ var x = 123 }')
+    expected = ast.Block(
+        statements=[
+            ast.VarDeclaration(
+                initialize=ast.BinaryOp(
+                    left=ast.Identifier(name='x'),
+                    op='=',
+                    right=ast.Literal(value=123)
+                )
+            )
+        ]
+    )
+
+    assert parse(input) == expected
+
+
+def test_var_outside_block_raises_exception() -> None:
+    input = tokenize('test', 'var x = 123')
+    unexpected = input[0]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: unexpected keyword "var"'
+    assert str(excep_info.value) == error
+
+
+def test_var_only_allowed_on_top_level() -> None:
+    input = tokenize('test', '{ if a < b then var x = 3 }')
+    unexpected = input[6]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: unexpected keyword "var"'
     assert str(excep_info.value) == error

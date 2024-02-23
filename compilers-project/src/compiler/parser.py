@@ -109,6 +109,14 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
         consume(')')
         return f
 
+    def parse_var_declaration() -> ast.VarDeclaration:
+        consume('var')
+        initialize = parse_expression()
+
+        return ast.VarDeclaration(
+            initialize
+        )
+
     def parse_block() -> ast.Block:
         consume('{')
         block = ast.Block(
@@ -119,7 +127,12 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             if peek().type == 'end':
                 raise Exception(f'{peek().location}: expected a "}}"')
 
+            if peek().type == 'keyword' and peek().text == 'var':
+                block.statements.append(parse_var_declaration())
+                continue
+
             block.statements.append(parse_expression())
+
             if peek().text == ';':
                 consume(';')
                 if peek().text == '}':
@@ -156,6 +169,9 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             if peek().text == 'while':
                 return parse_while_loop()
 
+            raise Exception(
+                f'{peek().location}: unexpected keyword "{peek().text}"')
+
         if peek().type == 'bool_literal':
             return parse_bool_literal()
 
@@ -163,7 +179,7 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             return parse_unary_op()
 
         raise Exception(
-            f'{peek().location}: expected an integer, an identifier, a boolean literal or if')
+            f'{peek().location}: expected integer, identifier, keyword, boolean literal or unary operator')
 
     def parse_parenthesized() -> ast.Expression:
         consume('(')
