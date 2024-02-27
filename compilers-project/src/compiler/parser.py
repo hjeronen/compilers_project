@@ -154,9 +154,9 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             if peek().type == 'end':
                 raise Exception(f'{peek().location}: expected a "}}"')
 
-            if peek().type == 'keyword' and peek().text == 'var':
-                block.statements.append(parse_var_declaration())
-                continue
+            # if peek().type == 'keyword' and peek().text == 'var':
+            #     block.statements.append(parse_var_declaration())
+            #     continue
 
             block.statements.append(parse_expression())
             if peek().text == ';':
@@ -199,6 +199,9 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
 
             if peek().text == 'while':
                 return parse_while_loop()
+
+            if pos == 0 or peek_backwards().text in [';', '{', '}']:
+                return parse_var_declaration()
 
             raise Exception(
                 f'{peek().location}: unexpected keyword "{peek().text}"')
@@ -379,6 +382,19 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
     result = parse_expression()
 
     if pos < len(tokens):
-        raise Exception(f'Unexpected token: {tokens[pos]}')
+        result = ast.Block(
+            location=tokens[0].location,
+            statements=[
+                result
+            ]
+        )
+
+        while peek().type != 'end':
+            if peek().text == ';' or peek_backwards().text == '}':
+                if peek().text == ';':
+                    consume(';')
+                result.statements.append(parse_expression())
+            else:
+                raise Exception(f'Unexpected token: {tokens[pos]}')
 
     return result

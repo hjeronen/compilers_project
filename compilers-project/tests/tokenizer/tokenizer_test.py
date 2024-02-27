@@ -70,17 +70,17 @@ def test_keywords() -> None:
 def test_others() -> None:
     tokens = [
         Token(
-            text='True',
+            text='true',
             type='bool_literal',
             location=location
         ),
         Token(
-            text='None',
+            text='null',
             type='null_literal',
             location=location
         )
     ]
-    assert tokenize(filename, 'True None') == tokens
+    assert tokenize(filename, 'true null') == tokens
 
 
 def test_variable_names() -> None:
@@ -301,7 +301,7 @@ def test_comment_oneline_python() -> None:
             location=location
         ),
         Token(
-            text='True',
+            text='true',
             type='bool_literal',
             location=location
         ),
@@ -322,7 +322,7 @@ def test_comment_oneline_python() -> None:
         )
     ]
 
-    code = 'if True:\n# comment ignored!\nreturn a\n'
+    code = 'if true:\n# comment ignored!\nreturn a\n'
 
     assert tokenize(filename, code) == tokens
 

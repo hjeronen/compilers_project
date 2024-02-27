@@ -30,3 +30,39 @@ def test_empty_string() -> None:
     input = tokenize('test', '')
 
     assert parse(input) == None
+
+
+def test_multiple_top_level_expressions_allowed() -> None:
+    input = tokenize('test', 'f(x); f(y)')
+    expected = ast.Block(
+        location,
+        statements=[
+            ast.FunctionCall(
+                location,
+                name=ast.Identifier(location, name='f'),
+                args=[
+                    ast.Identifier(location, name='x')
+                ]
+            ),
+            ast.FunctionCall(
+                location,
+                name=ast.Identifier(location, name='f'),
+                args=[
+                    ast.Identifier(location, name='y')
+                ]
+            )
+        ]
+    )
+
+    assert parse(input) == expected
+
+
+def test_top_level_expression_without_semicolon_raises_exception() -> None:
+    input = tokenize('test', 'var x = 0 { var x = 0 }')
+    unexpected = input[4]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'Unexpected token: {unexpected}'
+    assert str(excep_info.value) == error

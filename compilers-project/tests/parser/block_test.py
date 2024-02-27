@@ -86,7 +86,7 @@ def test_parse_block_missing_closing_brace_raises_exception() -> None:
 
 def test_parse_block_missing_opening_brace_raises_exception() -> None:
     input = tokenize('test', 'f(a); x = y; f(x)}')
-    unexpected = input[4]
+    unexpected = input[13]
 
     with pytest.raises(Exception) as excep_info:
         parse(input)
@@ -378,6 +378,39 @@ def test_assignment_with_block_allowed() -> None:
                 )
             ]
         )
+    )
+
+    assert parse(input) == expected
+
+
+def test_empty_block_allowed() -> None:
+    input = tokenize('test', '{ }')
+    expected = ast.Block(
+        location,
+        statements=[]
+    )
+
+    assert parse(input) == expected
+
+
+def test_multiple_top_level_blocks_allowed() -> None:
+    input = tokenize('test', '{ a } { b }')
+    expected = ast.Block(
+        location,
+        statements=[
+            ast.Block(
+                location,
+                statements=[
+                    ast.Identifier(location, name='a')
+                ]
+            ),
+            ast.Block(
+                location,
+                statements=[
+                    ast.Identifier(location, name='b')
+                ]
+            )
+        ]
     )
 
     assert parse(input) == expected
