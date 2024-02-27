@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+from .tokenizer import Location
 
 
 @dataclass
 class Expression:
     """Base class for AST nodes representing expressions."""
+    location: Location | None
 
 
 @dataclass

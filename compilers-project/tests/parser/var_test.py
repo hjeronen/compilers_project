@@ -1,18 +1,27 @@
 import pytest
 from compiler.parser import parse
 import compiler.ast as ast
-from compiler.tokenizer import tokenize
+from compiler.tokenizer import tokenize, AnyLocation
+
+location = AnyLocation(
+    file='test',
+    line=0,
+    column=0
+)
 
 
 def test_parsing_variable_declaration() -> None:
     input = tokenize('test', '{ var x = 123 }')
     expected = ast.Block(
+        location,
         statements=[
             ast.VarDeclaration(
+                location,
                 initialize=ast.BinaryOp(
-                    left=ast.Identifier(name='x'),
+                    location,
+                    left=ast.Identifier(location, name='x'),
                     op='=',
-                    right=ast.Literal(value=123)
+                    right=ast.Literal(location, value=123)
                 )
             )
         ]

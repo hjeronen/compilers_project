@@ -1,18 +1,26 @@
 import pytest
 from compiler.parser import parse
 import compiler.ast as ast
-from compiler.tokenizer import tokenize
+from compiler.tokenizer import tokenize, AnyLocation
+
+location = AnyLocation(
+    file='test',
+    line=0,
+    column=0
+)
 
 
 def test_parse_parenthesis() -> None:
     input = tokenize('test', 'a - (7 + 2)')
     expected = ast.BinaryOp(
-        left=ast.Identifier(name='a'),
+        location,
+        left=ast.Identifier(location, name='a'),
         op='-',
         right=ast.BinaryOp(
-            left=ast.Literal(value=7),
+            location,
+            left=ast.Literal(location, value=7),
             op='+',
-            right=ast.Literal(value=2)
+            right=ast.Literal(location, value=2)
         )
     )
 

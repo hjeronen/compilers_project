@@ -1,28 +1,38 @@
 import pytest
 from compiler.parser import parse
 import compiler.ast as ast
-from compiler.tokenizer import tokenize
+from compiler.tokenizer import tokenize, AnyLocation
+
+location = AnyLocation(
+    file='test',
+    line=0,
+    column=0
+)
 
 
 def test_parse_block_with_result_expression() -> None:
     input = tokenize('test', '{f(a); x = y; f(x)}')
     expected = ast.Block(
+        location,
         statements=[
             ast.FunctionCall(
-                name=ast.Identifier(name='f'),
+                location,
+                name=ast.Identifier(location, name='f'),
                 args=[
-                    ast.Identifier(name='a')
+                    ast.Identifier(location, name='a')
                 ]
             ),
             ast.BinaryOp(
-                left=ast.Identifier(name='x'),
+                location,
+                left=ast.Identifier(location, name='x'),
                 op='=',
-                right=ast.Identifier(name='y')
+                right=ast.Identifier(location, name='y')
             ),
             ast.FunctionCall(
-                name=ast.Identifier(name='f'),
+                location,
+                name=ast.Identifier(location, name='f'),
                 args=[
-                    ast.Identifier(name='x')
+                    ast.Identifier(location, name='x')
                 ]
             )
         ]
@@ -34,25 +44,29 @@ def test_parse_block_with_result_expression() -> None:
 def test_parse_block_without_result_expression() -> None:
     input = tokenize('test', '{f(a); x = y; f(x);}')
     expected = ast.Block(
+        location,
         statements=[
             ast.FunctionCall(
-                name=ast.Identifier(name='f'),
+                location,
+                name=ast.Identifier(location, name='f'),
                 args=[
-                    ast.Identifier(name='a')
+                    ast.Identifier(location, name='a')
                 ]
             ),
             ast.BinaryOp(
-                left=ast.Identifier(name='x'),
+                location,
+                left=ast.Identifier(location, name='x'),
                 op='=',
-                right=ast.Identifier(name='y')
+                right=ast.Identifier(location, name='y')
             ),
             ast.FunctionCall(
-                name=ast.Identifier(name='f'),
+                location,
+                name=ast.Identifier(location, name='f'),
                 args=[
-                    ast.Identifier(name='x')
+                    ast.Identifier(location, name='x')
                 ]
             ),
-            ast.Literal(value=None)
+            ast.Literal(location, value=None)
         ]
     )
 
@@ -85,49 +99,67 @@ def test_inner_blocks() -> None:
     input = tokenize('test', '{ while f() do { x = 10; y = if g(x)'
                      + 'then { x = x + 1; x } else { g(x) }; g(y); }; 123 }')
     expected = ast.Block(
+        location,
         statements=[
             ast.WhileLoop(
+                location,
                 condition=ast.FunctionCall(
-                    name=ast.Identifier(name='f'),
+                    location,
+                    name=ast.Identifier(location, name='f'),
                     args=[]
                 ),
                 body=ast.Block(
+                    location,
                     statements=[
                         ast.BinaryOp(
-                            left=ast.Identifier(name='x'),
+                            location,
+                            left=ast.Identifier(location, name='x'),
                             op='=',
-                            right=ast.Literal(value=10)
+                            right=ast.Literal(location, value=10)
                         ),
                         ast.BinaryOp(
-                            left=ast.Identifier(name='y'),
+                            location,
+                            left=ast.Identifier(location, name='y'),
                             op='=',
                             right=ast.IfStatement(
+                                location,
                                 condition=ast.FunctionCall(
-                                    name=ast.Identifier(name='g'),
+                                    location,
+                                    name=ast.Identifier(location, name='g'),
                                     args=[
-                                        ast.Identifier(name='x')
+                                        ast.Identifier(location, name='x')
                                     ]
                                 ),
                                 true_branch=ast.Block(
+                                    location,
                                     statements=[
                                         ast.BinaryOp(
-                                            left=ast.Identifier(name='x'),
+                                            location,
+                                            left=ast.Identifier(
+                                                location, name='x'),
                                             op='=',
                                             right=ast.BinaryOp(
-                                                left=ast.Identifier(name='x'),
+                                                location,
+                                                left=ast.Identifier(
+                                                    location, name='x'),
                                                 op='+',
-                                                right=ast.Literal(value=1)
+                                                right=ast.Literal(
+                                                    location, value=1)
                                             )
                                         ),
-                                        ast.Identifier(name='x')
+                                        ast.Identifier(location, name='x')
                                     ]
                                 ),
                                 false_branch=ast.Block(
+                                    location,
                                     statements=[
                                         ast.FunctionCall(
-                                            name=ast.Identifier(name='g'),
+                                            location,
+                                            name=ast.Identifier(
+                                                location, name='g'),
                                             args=[
-                                                ast.Identifier(name='x')
+                                                ast.Identifier(
+                                                    location, name='x')
                                             ]
                                         )
                                     ]
@@ -135,16 +167,17 @@ def test_inner_blocks() -> None:
                             )
                         ),
                         ast.FunctionCall(
-                            name=ast.Identifier(name='g'),
+                            location,
+                            name=ast.Identifier(location, name='g'),
                             args=[
-                                ast.Identifier(name='y')
+                                ast.Identifier(location, name='y')
                             ]
                         ),
-                        ast.Literal(value=None)
+                        ast.Literal(location, value=None)
                     ]
                 )
             ),
-            ast.Literal(value=123)
+            ast.Literal(location, value=123)
         ]
     )
 
@@ -165,15 +198,18 @@ def test_missing_semicolon_raises_exception() -> None:
 def test_inner_blocks_without_semicolons_allowed() -> None:
     input = tokenize('test', '{ { a } { b } }')
     expected = ast.Block(
+        location,
         statements=[
             ast.Block(
+                location,
                 statements=[
-                    ast.Identifier(name='a')
+                    ast.Identifier(location, name='a')
                 ]
             ),
             ast.Block(
+                location,
                 statements=[
-                    ast.Identifier(name='b')
+                    ast.Identifier(location, name='b')
                 ]
             )
         ]
@@ -207,17 +243,20 @@ def test_consecutive_semicolons_raises_exception() -> None:
 def test_if_then_without_semicolons_allowed() -> None:
     input = tokenize('test', '{ if true then { a } b }')
     expected = ast.Block(
+        location,
         statements=[
             ast.IfStatement(
-                condition=ast.Literal(value=True),
+                location,
+                condition=ast.Literal(location, value=True),
                 true_branch=ast.Block(
+                    location,
                     statements=[
-                        ast.Identifier(name='a')
+                        ast.Identifier(location, name='a')
                     ]
                 ),
                 false_branch=None
             ),
-            ast.Identifier(name='b')
+            ast.Identifier(location, name='b')
         ]
     )
 
@@ -227,17 +266,20 @@ def test_if_then_without_semicolons_allowed() -> None:
 def test_if_then_with_semicolons_allowed() -> None:
     input = tokenize('test', '{ if true then { a }; b }')
     expected = ast.Block(
+        location,
         statements=[
             ast.IfStatement(
-                condition=ast.Literal(value=True),
+                location,
+                condition=ast.Literal(location, value=True),
                 true_branch=ast.Block(
+                    location,
                     statements=[
-                        ast.Identifier(name='a')
+                        ast.Identifier(location, name='a')
                     ]
                 ),
                 false_branch=None
             ),
-            ast.Identifier(name='b')
+            ast.Identifier(location, name='b')
         ]
     )
 
@@ -258,18 +300,21 @@ def test_identifiers_after_block_without_semicolons_raises_exception() -> None:
 def test_identifiers_after_block_with_semicolons_allowed() -> None:
     input = tokenize('test', '{ if true then { a } b; c }')
     expected = ast.Block(
+        location,
         statements=[
             ast.IfStatement(
-                condition=ast.Literal(value=True),
+                location,
+                condition=ast.Literal(location, value=True),
                 true_branch=ast.Block(
+                    location,
                     statements=[
-                        ast.Identifier(name='a')
+                        ast.Identifier(location, name='a')
                     ]
                 ),
                 false_branch=None
             ),
-            ast.Identifier(name='b'),
-            ast.Identifier(name='c')
+            ast.Identifier(location, name='b'),
+            ast.Identifier(location, name='c')
         ]
     )
 
@@ -279,21 +324,25 @@ def test_identifiers_after_block_with_semicolons_allowed() -> None:
 def test_if_branches_with_blocks() -> None:
     input = tokenize('test', '{ if true then { a } else { b } 3 }')
     expected = ast.Block(
+        location,
         statements=[
             ast.IfStatement(
-                condition=ast.Literal(value=True),
+                location,
+                condition=ast.Literal(location, value=True),
                 true_branch=ast.Block(
+                    location,
                     statements=[
-                        ast.Identifier(name='a')
+                        ast.Identifier(location, name='a')
                     ]
                 ),
                 false_branch=ast.Block(
+                    location,
                     statements=[
-                        ast.Identifier(name='b')
+                        ast.Identifier(location, name='b')
                     ]
                 )
             ),
-            ast.Literal(value=3)
+            ast.Literal(location, value=3)
         ]
     )
 
@@ -303,23 +352,28 @@ def test_if_branches_with_blocks() -> None:
 def test_assignment_with_block_allowed() -> None:
     input = tokenize('test', 'x = { { f(a) } { b } }')
     expected = ast.BinaryOp(
-        left=ast.Identifier(name='x'),
+        location,
+        left=ast.Identifier(location, name='x'),
         op='=',
         right=ast.Block(
+            location,
             statements=[
                 ast.Block(
+                    location,
                     statements=[
                         ast.FunctionCall(
-                            name=ast.Identifier(name='f'),
+                            location,
+                            name=ast.Identifier(location, name='f'),
                             args=[
-                                ast.Identifier(name='a')
+                                ast.Identifier(location, name='a')
                             ]
                         )
                     ]
                 ),
                 ast.Block(
+                    location,
                     statements=[
-                        ast.Identifier(name='b')
+                        ast.Identifier(location, name='b')
                     ]
                 )
             ]

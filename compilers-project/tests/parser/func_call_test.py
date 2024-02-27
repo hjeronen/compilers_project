@@ -1,19 +1,27 @@
 import pytest
 from compiler.parser import parse
 import compiler.ast as ast
-from compiler.tokenizer import tokenize
+from compiler.tokenizer import tokenize, AnyLocation
+
+location = AnyLocation(
+    file='test',
+    line=0,
+    column=0
+)
 
 
 def test_parsing_function_call() -> None:
     input = tokenize('test', 'f(x, y + z)')
     expected = ast.FunctionCall(
-        name=ast.Identifier(name='f'),
+        location,
+        name=ast.Identifier(location, name='f'),
         args=[
-            ast.Identifier(name='x'),
+            ast.Identifier(location, name='x'),
             ast.BinaryOp(
-                left=ast.Identifier(name='y'),
+                location,
+                left=ast.Identifier(location, name='y'),
                 op='+',
-                right=ast.Identifier(name='z')
+                right=ast.Identifier(location, name='z')
             )
         ]
     )
@@ -24,9 +32,10 @@ def test_parsing_function_call() -> None:
 def test_function_with_longer_name() -> None:
     input = tokenize('test', 'print_out(x)')
     expected = ast.FunctionCall(
-        name=ast.Identifier(name='print_out'),
+        location,
+        name=ast.Identifier(location, name='print_out'),
         args=[
-            ast.Identifier(name='x')
+            ast.Identifier(location, name='x')
         ]
     )
 

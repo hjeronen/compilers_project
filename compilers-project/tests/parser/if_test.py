@@ -1,22 +1,31 @@
 import pytest
 from compiler.parser import parse
 import compiler.ast as ast
-from compiler.tokenizer import tokenize
+from compiler.tokenizer import tokenize, AnyLocation
+
+location = AnyLocation(
+    file='test',
+    line=0,
+    column=0
+)
 
 
 def test_if_statement() -> None:
     input = tokenize('test', 'if a then b + c else x * y')
     expected = ast.IfStatement(
-        condition=ast.Identifier(name='a'),
+        location,
+        condition=ast.Identifier(location, name='a'),
         true_branch=ast.BinaryOp(
-            left=ast.Identifier(name='b'),
+            location,
+            left=ast.Identifier(location, name='b'),
             op='+',
-            right=ast.Identifier(name='c')
+            right=ast.Identifier(location, name='c')
         ),
         false_branch=ast.BinaryOp(
-            left=ast.Identifier(name='x'),
+            location,
+            left=ast.Identifier(location, name='x'),
             op='*',
-            right=ast.Identifier(name='y')
+            right=ast.Identifier(location, name='y')
         )
     )
 
@@ -26,11 +35,13 @@ def test_if_statement() -> None:
 def test_if_statement_without_else() -> None:
     input = tokenize('test', 'if a then b + c')
     expected = ast.IfStatement(
-        condition=ast.Identifier(name='a'),
+        location,
+        condition=ast.Identifier(location, name='a'),
         true_branch=ast.BinaryOp(
-            left=ast.Identifier(name='b'),
+            location,
+            left=ast.Identifier(location, name='b'),
             op='+',
-            right=ast.Identifier(name='c')
+            right=ast.Identifier(location, name='c')
         ),
         false_branch=None
     )
@@ -41,12 +52,14 @@ def test_if_statement_without_else() -> None:
 def test_if_as_sub_statement() -> None:
     input = tokenize('test', '1 + if true then 2 else 3')
     expected = ast.BinaryOp(
-        left=ast.Literal(value=1),
+        location,
+        left=ast.Literal(location, value=1),
         op='+',
         right=ast.IfStatement(
-            condition=ast.Literal(value=True),
-            true_branch=ast.Literal(value=2),
-            false_branch=ast.Literal(value=3)
+            location,
+            condition=ast.Literal(location, value=True),
+            true_branch=ast.Literal(location, value=2),
+            false_branch=ast.Literal(location, value=3)
         )
     )
 

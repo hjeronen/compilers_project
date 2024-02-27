@@ -1,18 +1,26 @@
 import pytest
 from compiler.parser import parse
 import compiler.ast as ast
-from compiler.tokenizer import tokenize
+from compiler.tokenizer import tokenize, AnyLocation
+
+location = AnyLocation(
+    file='test',
+    line=0,
+    column=0
+)
 
 
 def test_comparison_operator() -> None:
     input = tokenize('test', '1 < 2 + 3')
     expected = ast.BinaryOp(
-        left=ast.Literal(value=1),
+        location,
+        left=ast.Literal(location, value=1),
         op='<',
         right=ast.BinaryOp(
-            left=ast.Literal(value=2),
+            location,
+            left=ast.Literal(location, value=2),
             op='+',
-            right=ast.Literal(value=3)
+            right=ast.Literal(location, value=3)
         )
     )
 
@@ -33,13 +41,15 @@ def test_consecutive_comparisons_raises_exception() -> None:
 def test_consecutive_comparisons_with_parentheses_allowed() -> None:
     input = tokenize('test', '(1 < 2) < 3')
     expected = ast.BinaryOp(
+        location,
         left=ast.BinaryOp(
-            left=ast.Literal(value=1),
+            location,
+            left=ast.Literal(location, value=1),
             op='<',
-            right=ast.Literal(value=2)
+            right=ast.Literal(location, value=2)
         ),
         op='<',
-        right=ast.Literal(value=3)
+        right=ast.Literal(location, value=3)
     )
 
     assert parse(input) == expected

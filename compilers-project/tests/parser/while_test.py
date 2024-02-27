@@ -1,20 +1,29 @@
 import pytest
 from compiler.parser import parse
 import compiler.ast as ast
-from compiler.tokenizer import tokenize
+from compiler.tokenizer import tokenize, AnyLocation
+
+location = AnyLocation(
+    file='test',
+    line=0,
+    column=0
+)
 
 
 def test_parse_while_loop() -> None:
     input = tokenize('test', 'while true do x = x + 1')
     expected = ast.WhileLoop(
-        condition=ast.Literal(value=True),
+        location,
+        condition=ast.Literal(location, value=True),
         body=ast.BinaryOp(
-            left=ast.Identifier(name='x'),
+            location,
+            left=ast.Identifier(location, name='x'),
             op='=',
             right=ast.BinaryOp(
-                left=ast.Identifier(name='x'),
+                location,
+                left=ast.Identifier(location, name='x'),
                 op='+',
-                right=ast.Literal(value=1)
+                right=ast.Literal(location, value=1)
             )
         )
     )
