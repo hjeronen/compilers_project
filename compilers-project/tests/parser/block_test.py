@@ -160,3 +160,170 @@ def test_missing_semicolon_raises_exception() -> None:
 
     error = f'{unexpected.location}: expected ";" or "}}"'
     assert str(excep_info.value) == error
+
+
+def test_inner_blocks_without_semicolons_allowed() -> None:
+    input = tokenize('test', '{ { a } { b } }')
+    expected = ast.Block(
+        statements=[
+            ast.Block(
+                statements=[
+                    ast.Identifier(name='a')
+                ]
+            ),
+            ast.Block(
+                statements=[
+                    ast.Identifier(name='b')
+                ]
+            )
+        ]
+    )
+
+    assert parse(input) == expected
+
+
+def test_identifiers_without_semicolons_raises_exception() -> None:
+    input = tokenize('test', '{ a b }')
+    unexpected = input[2]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: expected ";" or "}}"'
+    assert str(excep_info.value) == error
+
+
+def test_consecutive_semicolons_raises_exception() -> None:
+    input = tokenize('test', '{ a;; b }')
+    unexpected = input[3]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: expected integer, identifier, keyword, boolean literal or unary operator'
+    assert str(excep_info.value) == error
+
+
+def test_if_then_without_semicolons_allowed() -> None:
+    input = tokenize('test', '{ if true then { a } b }')
+    expected = ast.Block(
+        statements=[
+            ast.IfStatement(
+                condition=ast.Literal(value=True),
+                true_branch=ast.Block(
+                    statements=[
+                        ast.Identifier(name='a')
+                    ]
+                ),
+                false_branch=None
+            ),
+            ast.Identifier(name='b')
+        ]
+    )
+
+    assert parse(input) == expected
+
+
+def test_if_then_with_semicolons_allowed() -> None:
+    input = tokenize('test', '{ if true then { a }; b }')
+    expected = ast.Block(
+        statements=[
+            ast.IfStatement(
+                condition=ast.Literal(value=True),
+                true_branch=ast.Block(
+                    statements=[
+                        ast.Identifier(name='a')
+                    ]
+                ),
+                false_branch=None
+            ),
+            ast.Identifier(name='b')
+        ]
+    )
+
+    assert parse(input) == expected
+
+
+def test_identifiers_after_block_without_semicolons_raises_exception() -> None:
+    input = tokenize('test', '{ if true then { a } b c }')
+    unexpected = input[8]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: expected ";" or "}}"'
+    assert str(excep_info.value) == error
+
+
+def test_identifiers_after_block_with_semicolons_allowed() -> None:
+    input = tokenize('test', '{ if true then { a } b; c }')
+    expected = ast.Block(
+        statements=[
+            ast.IfStatement(
+                condition=ast.Literal(value=True),
+                true_branch=ast.Block(
+                    statements=[
+                        ast.Identifier(name='a')
+                    ]
+                ),
+                false_branch=None
+            ),
+            ast.Identifier(name='b'),
+            ast.Identifier(name='c')
+        ]
+    )
+
+    assert parse(input) == expected
+
+
+def test_if_branches_with_blocks() -> None:
+    input = tokenize('test', '{ if true then { a } else { b } 3 }')
+    expected = ast.Block(
+        statements=[
+            ast.IfStatement(
+                condition=ast.Literal(value=True),
+                true_branch=ast.Block(
+                    statements=[
+                        ast.Identifier(name='a')
+                    ]
+                ),
+                false_branch=ast.Block(
+                    statements=[
+                        ast.Identifier(name='b')
+                    ]
+                )
+            ),
+            ast.Literal(value=3)
+        ]
+    )
+
+    assert parse(input) == expected
+
+
+def test_assignment_with_block_allowed() -> None:
+    input = tokenize('test', 'x = { { f(a) } { b } }')
+    expected = ast.BinaryOp(
+        left=ast.Identifier(name='x'),
+        op='=',
+        right=ast.Block(
+            statements=[
+                ast.Block(
+                    statements=[
+                        ast.FunctionCall(
+                            name=ast.Identifier(name='f'),
+                            args=[
+                                ast.Identifier(name='a')
+                            ]
+                        )
+                    ]
+                ),
+                ast.Block(
+                    statements=[
+                        ast.Identifier(name='b')
+                    ]
+                )
+            ]
+        )
+    )
+
+    assert parse(input) == expected

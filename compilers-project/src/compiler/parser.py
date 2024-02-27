@@ -21,6 +21,12 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             text=''
         )
 
+    def peek_backwards() -> Token:
+        if pos - 1 >= 0:
+            return tokens[pos - 1]
+
+        return tokens[0]
+
     def consume(expected: str | list[str] | None = None) -> Token:
         nonlocal pos
         token = peek()
@@ -132,15 +138,17 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
                 continue
 
             block.statements.append(parse_expression())
-
             if peek().text == ';':
                 consume(';')
                 if peek().text == '}':
                     block.statements.append(ast.Literal(value=None))
-            elif peek().text != '}':
+            elif peek_backwards().text == '}':
+                continue
+            elif peek().text not in ['{', '}']:
                 raise Exception(f'{peek().location}: expected ";" or "}}"')
 
         consume('}')
+
         return block
 
     def parse_factor() -> ast.Expression:
