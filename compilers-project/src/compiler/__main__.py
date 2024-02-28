@@ -1,6 +1,7 @@
 import sys
 from .tokenizer import tokenize
 from .parser import parse
+from .interpreter import interpret
 
 # TODO(student): add more commands as needed
 usage = f"""
@@ -49,6 +50,8 @@ def main() -> int:
                 print(token)
             tree = parse(tokens)
             print(tree)
+            result = interpret(tree)
+            print(result)
         ...  # TODO(student)
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
