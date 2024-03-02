@@ -64,7 +64,8 @@ class Block(Expression):
 
 @dataclass
 class VarDeclaration(Expression):
-    initialize: Expression
+    name: Identifier
+    value: Expression
 
 
 ...  # You get to define more later

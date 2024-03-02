@@ -17,12 +17,8 @@ def test_parsing_variable_declaration() -> None:
         statements=[
             ast.VarDeclaration(
                 location,
-                initialize=ast.BinaryOp(
-                    location,
-                    left=ast.Identifier(location, name='x'),
-                    op='=',
-                    right=ast.Literal(location, value=123)
-                )
+                name=ast.Identifier(location, name='x'),
+                value=ast.Literal(location, value=123)
             )
         ]
     )
@@ -45,12 +41,8 @@ def test_top_level_var_without_block_allowed() -> None:
     input = tokenize('test', 'var x = 0')
     expected = ast.VarDeclaration(
         location,
-        initialize=ast.BinaryOp(
-            location,
-            left=ast.Identifier(location, name='x'),
-            op='=',
-            right=ast.Literal(location, value=0)
-        )
+        name=ast.Identifier(location, name='x'),
+        value=ast.Literal(location, value=0)
     )
 
     assert parse(input) == expected
@@ -66,23 +58,15 @@ def test_top_level_var_after_block_allowed() -> None:
                 statements=[
                     ast.VarDeclaration(
                         location,
-                        initialize=ast.BinaryOp(
-                            location,
-                            left=ast.Identifier(location, name='x'),
-                            op='=',
-                            right=ast.Literal(location, value=0)
-                        )
+                        name=ast.Identifier(location, name='x'),
+                        value=ast.Literal(location, value=0)
                     )
                 ]
             ),
             ast.VarDeclaration(
                 location,
-                initialize=ast.BinaryOp(
-                    location,
-                    left=ast.Identifier(location, name='x'),
-                    op='=',
-                    right=ast.Literal(location, value=0)
-                )
+                name=ast.Identifier(location, name='x'),
+                value=ast.Literal(location, value=0)
             )
         ]
     )
@@ -97,24 +81,16 @@ def test_top_level_var_before_block_allowed() -> None:
         statements=[
             ast.VarDeclaration(
                 location,
-                initialize=ast.BinaryOp(
-                    location,
-                    left=ast.Identifier(location, name='x'),
-                    op='=',
-                    right=ast.Literal(location, value=0)
-                )
+                name=ast.Identifier(location, name='x'),
+                value=ast.Literal(location, value=0)
             ),
             ast.Block(
                 location,
                 statements=[
                     ast.VarDeclaration(
                         location,
-                        initialize=ast.BinaryOp(
-                            location,
-                            left=ast.Identifier(location, name='x'),
-                            op='=',
-                            right=ast.Literal(location, value=0)
-                        )
+                        name=ast.Identifier(location, name='x'),
+                        value=ast.Literal(location, value=0)
                     )
                 ]
             )
@@ -122,3 +98,30 @@ def test_top_level_var_before_block_allowed() -> None:
     )
 
     assert parse(input) == expected
+
+
+def test_var_value_can_be_expression() -> None:
+    input = tokenize('test', 'var x = 0 + 1')
+    expected = ast.VarDeclaration(
+        location,
+        name=ast.Identifier(location, name='x'),
+        value=ast.BinaryOp(
+            location,
+            left=ast.Literal(location, value=0),
+            op='+',
+            right=ast.Literal(location, value=1)
+        )
+    )
+
+    assert parse(input) == expected
+
+
+def test_number_not_allowed_as_var_name() -> None:
+    input = tokenize('test', 'var 1 = 0 + 1')
+    unexpected = input[1]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: expected an identifier'
+    assert str(excep_info.value) == error
