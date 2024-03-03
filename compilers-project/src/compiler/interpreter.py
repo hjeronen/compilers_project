@@ -1,6 +1,4 @@
-import inspect
 import operator
-import types
 from typing import Any, Callable
 from compiler import ast
 from typing import Union

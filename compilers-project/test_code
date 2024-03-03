@@ -1,1 +1,1 @@
-{ var b = false; not b }
+if true then 3 else 4

@@ -2,6 +2,7 @@ import sys
 from .tokenizer import tokenize
 from .parser import parse
 from .interpreter import interpret, SymTab, locals
+from .type_checker import typecheck
 
 # TODO(student): add more commands as needed
 usage = f"""
@@ -53,6 +54,8 @@ def main() -> int:
             symtab = SymTab(locals=locals, parent=None)
             result = interpret(tree, symtab)
             print(result)
+            check_type = typecheck(tree)
+            print(check_type)
         ...  # TODO(student)
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
