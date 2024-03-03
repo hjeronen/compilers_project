@@ -190,6 +190,17 @@ def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
 
             return result
 
+        case ast.WhileLoop():
+            cond = interpret(node.condition, symtab)
+            if cond is True:
+                interpret(node.body, symtab)
+                return interpret(node, symtab)
+            elif cond is False:
+                return Unit()
+            else:
+                raise Exception(
+                    f'{node.location}: failed to evaluate condition')
+
         case ast.FunctionCall():
             if isinstance(node.name, ast.Identifier):
                 name = node.name.name

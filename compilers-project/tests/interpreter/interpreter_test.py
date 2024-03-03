@@ -50,6 +50,13 @@ def test_interpret_inner_blocks() -> None:
     assert interpret(input, symtab) == expected
 
 
+def test_block_without_last_statement_returns_unit() -> None:
+    input = parse(tokenize('test', '{ var x = 0; x = x + 1; }'))
+    expected = Unit()
+
+    assert interpret(input, symtab) == expected
+
+
 def test_empty_blocks() -> None:
     input = parse(tokenize('test', '{ }'))
     expected = Unit()
@@ -121,6 +128,20 @@ def test_if_then_else_statement() -> None:
     assert interpret(input, symtab) == expected
 
 
+def test_binary_and() -> None:
+    input = parse(tokenize('test', 'true and true and true'))
+    expected = True
+
+    assert interpret(input, symtab) == expected
+
+
+def test_binary_or() -> None:
+    input = parse(tokenize('test', 'false or false or true'))
+    expected = True
+
+    assert interpret(input, symtab) == expected
+
+
 def test_shorcircuiting_or() -> None:
     program = ('var evaluated_right_hand_side = false;'
                + ' true or { evaluated_right_hand_side = true; true };'
@@ -139,5 +160,13 @@ def test_shorcircuiting_and() -> None:
 
     input = parse(tokenize('test', program))
     expected = False
+
+    assert interpret(input, symtab) == expected
+
+
+def test_while_loop() -> None:
+    input = parse(
+        tokenize('test', '{ var x = 0; while x < 3 do x = x + 1; x }'))
+    expected = 3
 
     assert interpret(input, symtab) == expected
