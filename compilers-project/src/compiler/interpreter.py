@@ -91,26 +91,37 @@ def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
             return context.locals[node.name]
 
         case ast.BinaryOp():
-            a: Any = interpret(node.left, symtab)
-            b: Any = interpret(node.right, symtab)
-
             if node.op == '=':
+                value = interpret(node.right, symtab)
                 if isinstance(node.left, ast.Identifier):
                     if node.left.name in symtab.locals:
-                        symtab.locals[node.left.name] = b
+                        symtab.locals[node.left.name] = value
                     else:
                         parent_context = find_context(symtab, node.left.name)
-                        parent_context.locals[node.left.name] = b
-                    return b
+                        parent_context.locals[node.left.name] = value
+                    return value
                 else:
                     raise Exception(
                         f'Only identifiers allowed as variable names.')
 
-            if node.op in context.locals:
+            elif node.op in context.locals:
+                a: Any = interpret(node.left, symtab)
                 op = context.locals[node.op]
+
                 if not callable(op):
                     raise Exception(f'{node.location}: {op} is not a function')
+
+                elif node.op == 'and':
+                    if a is False:
+                        return False
+                elif node.op == 'or':
+                    if a is True:
+                        return True
+
+                b: Any = interpret(node.right, symtab)
+
                 return op(a, b)
+
             else:
                 raise Exception(f'{node.location}: unknown operator {node.op}')
 

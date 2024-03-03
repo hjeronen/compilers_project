@@ -119,3 +119,25 @@ def test_if_then_else_statement() -> None:
     expected = 4
 
     assert interpret(input, symtab) == expected
+
+
+def test_shorcircuiting_or() -> None:
+    program = ('var evaluated_right_hand_side = false;'
+               + ' true or { evaluated_right_hand_side = true; true };'
+               + ' evaluated_right_hand_side')
+
+    input = parse(tokenize('test', program))
+    expected = False
+
+    assert interpret(input, symtab) == expected
+
+
+def test_shorcircuiting_and() -> None:
+    program = ('var evaluated_right_hand_side = false;'
+               + ' false and { evaluated_right_hand_side = true; true };'
+               + ' evaluated_right_hand_side')
+
+    input = parse(tokenize('test', program))
+    expected = False
+
+    assert interpret(input, symtab) == expected
