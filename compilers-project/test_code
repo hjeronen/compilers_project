@@ -1,1 +1,1 @@
-{ var x = 0 + 1; x + 1 }
+{ var b = false; not b }

@@ -1,4 +1,7 @@
-from typing import Any
+import inspect
+import operator
+import types
+from typing import Any, Callable
 from compiler import ast
 from typing import Union
 from dataclasses import dataclass
@@ -10,13 +13,57 @@ class Unit:
         return 'unit'
 
 
-Value = Union[int, Unit, bool, None]
+Value = Union[int, bool, None, Unit, Callable]
 
 
 @dataclass
 class SymTab:
     locals: dict
     parent: 'SymTab | None'
+
+
+def print_int(i: int) -> None:
+    print(i)
+
+
+def print_bool(value: bool) -> None:
+    if value:
+        print('true')
+    else:
+        print('false')
+
+
+def read_int() -> int:
+    value = input()
+    return int(value)
+
+
+locals = {
+    'print_int': print_int,
+    'print_bool': print_bool,
+    'read_int': read_int,
+    'or': operator.or_,
+    'and': operator.and_,
+    '==': operator.eq,
+    '!=': operator.ne,
+    '<': operator.lt,
+    '<=': operator.le,
+    '>': operator.gt,
+    '>=': operator.ge,
+    '+': operator.add,
+    '-': operator.sub,
+    '*': operator.mul,
+    '/': operator.floordiv,
+    '%': operator.mod,
+    'unary_-': operator.neg,
+    'not': operator.not_
+}
+
+
+def find_top_level_context(symtab: SymTab) -> SymTab:
+    if symtab.parent is not None:
+        return find_top_level_context(symtab.parent)
+    return symtab
 
 
 def find_context(symtab: SymTab, name: str) -> SymTab:
@@ -32,6 +79,8 @@ def find_context(symtab: SymTab, name: str) -> SymTab:
 def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
     if node is None:
         return None
+
+    context = find_top_level_context(symtab)
 
     match node:
         case ast.Literal():
@@ -50,47 +99,61 @@ def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
                     if node.left.name in symtab.locals:
                         symtab.locals[node.left.name] = b
                     else:
-                        context = find_context(symtab, node.left.name)
-                        context.locals[node.left.name] = b
+                        parent_context = find_context(symtab, node.left.name)
+                        parent_context.locals[node.left.name] = b
                     return b
                 else:
                     raise Exception(
                         f'Only identifiers allowed as variable names.')
 
-            if node.op == 'or':
-                return a or b
-            if node.op == 'and':
-                return a and b
-            elif node.op == '==':
-                return a == b
-            elif node.op == '!=':
-                return a != b
-            elif node.op == '<':
-                return a < b
-            elif node.op == '<=':
-                return a <= b
-            elif node.op == '>':
-                return a > b
-            elif node.op == '>=':
-                return a >= b
-            if node.op == '+':
-                return a + b
-            elif node.op == '-':
-                return a - b
-            elif node.op == '*':
-                return a * b
-            elif node.op == '/':
-                return a // b
-            elif node.op == '%':
-                return a % b
+            if node.op in context.locals:
+                op = context.locals[node.op]
+                if not callable(op):
+                    raise Exception(f'{node.location}: {op} is not a function')
+                return op(a, b)
             else:
                 raise Exception(f'{node.location}: unknown operator {node.op}')
 
-        case ast.IfStatement():
-            if interpret(node.condition, symtab):
-                return interpret(node.true_branch, symtab)
+        case ast.UnaryOp():
+            expr = interpret(node.expr, symtab)
+            if isinstance(expr, bool):
+                if node.op in context.locals:
+                    op = context.locals[node.op]
+                    return op(expr)
+                else:
+                    raise Exception(
+                        f'{node.location}: incompatible operator {node.op} for boolean')
+            elif isinstance(expr, int):
+                op = 'unary_' + node.op
+                if op in context.locals:
+                    op = context.locals[op]
+                    return op(expr)
+                else:
+                    raise Exception(
+                        f'{node.location}: incompatible operator {node.op} for integer')
             else:
-                return interpret(node.false_branch, symtab)
+                raise Exception(
+                    f'{node.location}: expression must be an integer or boolean')
+
+        case ast.IfStatement():
+            cond = interpret(node.condition, symtab)
+            if node.false_branch is None:
+                if cond is True:
+                    interpret(node.true_branch, symtab)
+                    return Unit()
+                elif cond is False:
+                    return Unit()
+                else:
+                    raise Exception(
+                        f'{node.location}: unable to evaluate condition')
+            else:
+                if cond is True:
+                    return interpret(node.true_branch, symtab)
+                elif cond is False:
+                    return interpret(node.false_branch, symtab)
+                else:
+                    raise Exception(
+                        f'{node.location}: unable to evaluate condition')
 
         case ast.VarDeclaration():
             if not isinstance(node.name, ast.Identifier):
@@ -115,6 +178,26 @@ def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
                 return Unit()
 
             return result
+
+        case ast.FunctionCall():
+            if isinstance(node.name, ast.Identifier):
+                name = node.name.name
+                if name in context.locals:
+                    f = context.locals[name]
+                    if not callable(f):
+                        raise Exception(
+                            f'{node.location}: {f} is not a function')
+                    args = []
+                    for arg in node.args:
+                        args.append(interpret(arg, symtab))
+                    result = f(*args)
+                    return result
+                else:
+                    raise Exception(
+                        f'{node.location}: unknown function call {name}')
+            else:
+                raise Exception(
+                    f'{node.location}: function name has to be an Identifier')
 
         case _:
             raise Exception(f'{node.location}: unrecognized AST node')

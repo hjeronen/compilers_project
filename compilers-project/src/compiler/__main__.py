@@ -1,7 +1,7 @@
 import sys
 from .tokenizer import tokenize
 from .parser import parse
-from .interpreter import interpret, SymTab
+from .interpreter import interpret, SymTab, locals
 
 # TODO(student): add more commands as needed
 usage = f"""
@@ -50,7 +50,7 @@ def main() -> int:
                 print(token)
             tree = parse(tokens)
             print(tree)
-            symtab = SymTab(locals={}, parent=None)
+            symtab = SymTab(locals=locals, parent=None)
             result = interpret(tree, symtab)
             print(result)
         ...  # TODO(student)
