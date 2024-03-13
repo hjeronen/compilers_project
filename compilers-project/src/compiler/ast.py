@@ -9,6 +9,21 @@ class Expression:
 
 
 @dataclass
+class TypeExpression:
+    """Base class for AST nodes representing type expressions."""
+
+
+@dataclass
+class Int(TypeExpression):
+    type: str
+
+
+@dataclass
+class Bool(TypeExpression):
+    type: str
+
+
+@dataclass
 class Literal(Expression):
     value: int | bool | None
     # (value=None is used when parsing the keyword `unit`)
@@ -65,7 +80,7 @@ class Block(Expression):
 @dataclass
 class VarDeclaration(Expression):
     name: Identifier
-    type: Identifier | None
+    type: TypeExpression | None
     value: Expression
 
 

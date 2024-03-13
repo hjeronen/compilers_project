@@ -132,20 +132,32 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
         consume(')')
         return f
 
-    def parse_var_declaration() -> ast.VarDeclaration:
-        location = peek().location
-        type = None
-
-        consume('var')
-
-        name = parse_identifier()
-
+    def parse_type_expression() -> ast.TypeExpression | None:
         if peek().text == ':':
             consume(':')
-            type = parse_identifier()
+            if peek().text == 'Int':
+                consume('Int')
+                return ast.Int('Int')
 
+            elif peek().text == 'Bool':
+                consume('Bool')
+                return ast.Bool('Bool')
+
+            elif peek().text == '=':
+                raise Exception(
+                    f'{peek().location}: missing type declaration')
+            else:
+                raise Exception(
+                    f'{peek().location}: invalid type declaration "{peek().text}"')
+        else:
+            return None
+
+    def parse_var_declaration() -> ast.VarDeclaration:
+        location = peek().location
+        consume('var')
+        name = parse_identifier()
+        type = parse_type_expression()
         consume('=')
-
         value = parse_expression()
 
         return ast.VarDeclaration(

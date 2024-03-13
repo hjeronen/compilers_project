@@ -35,7 +35,7 @@ def test_parsing_typed_var_declaration() -> None:
             ast.VarDeclaration(
                 location,
                 name=ast.Identifier(location, name='x'),
-                type=ast.Identifier(location, name='Int'),
+                type=ast.Int('Int'),
                 value=ast.Literal(location, value=123)
             )
         ]
@@ -44,14 +44,14 @@ def test_parsing_typed_var_declaration() -> None:
     assert parse(input) == expected
 
 
-def test_missing_identifier_after_semicolon_raises_exception() -> None:
+def test_missing_type_after_semicolon_raises_exception() -> None:
     input = tokenize('test', '{ var x: = 3 }')
     unexpected = input[4]
 
     with pytest.raises(Exception) as excep_info:
         parse(input)
 
-    error = f'{unexpected.location}: expected an identifier'
+    error = f'{unexpected.location}: missing type declaration'
     assert str(excep_info.value) == error
 
 
@@ -63,6 +63,17 @@ def test_double_identifier_after_semicolon_raises_exception() -> None:
         parse(input)
 
     error = f'{unexpected.location}: expected "="'
+    assert str(excep_info.value) == error
+
+
+def test_unknown_identifier_after_semicolon_raises_exception() -> None:
+    input = tokenize('test', '{ var x: string = 3 }')
+    unexpected = input[4]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: invalid type declaration "string"'
     assert str(excep_info.value) == error
 
 

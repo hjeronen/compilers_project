@@ -182,3 +182,22 @@ def test_typechecking_while_loop_returns_unit() -> None:
     expected = Unit
 
     assert typecheck(input, SymTab(locals={}, parent=None)) == expected
+
+
+def test_typecheck_var_with_type() -> None:
+    input = parse(tokenize('test', 'var x: Int = 1 + 1'))
+    expected = Int
+
+    assert typecheck(input, SymTab(locals={}, parent=None)) == expected
+
+
+def test_mismatching_types_in_var_dec_raises_exception() -> None:
+    tokens = tokenize('test', 'var x: Int = true')
+    input = parse(tokens)
+    unexpected = tokens[0]
+
+    with pytest.raises(Exception) as excep_info:
+        typecheck(input, SymTab(locals={}, parent=None))
+
+    error = f'{unexpected.location}: type error, expected Int'
+    assert str(excep_info.value) == error

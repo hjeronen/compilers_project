@@ -25,16 +25,32 @@ def typecheck(node: ast.Expression | None, symtab: SymTab) -> Type:
                 raise Exception(f'Unknown identifier {node.name}')
 
         case ast.VarDeclaration():
+            if node.name.name in symtab.locals:
+                raise Exception(
+                    f'Variable {node.name.name} has already been declared')
+
+            value_type = typecheck(node.value, symtab)
+
             if node.type is None:
-                type = typecheck(node.value, symtab)
-                if node.name.name not in symtab.locals:
-                    symtab.locals[node.name.name] = type
-                    return type
-                else:
+                symtab.locals[node.name.name] = value_type
+                return value_type
+
+            elif isinstance(node.type, ast.Int):
+                if value_type != Int:
                     raise Exception(
-                        f'Variable {node.name.name} has already been declared')
+                        f'{node.location}: type error, expected Int')
+                symtab.locals[node.name.name] = Int
+                return Int
+
+            elif isinstance(node.type, ast.Bool):
+                if value_type != Int:
+                    raise Exception(
+                        f'{node.location}: type error, expected Bool')
+                symtab.locals[node.name.name] = Bool
+                return Bool
+
             else:
-                raise Exception(f'Typed variables not supported yet.')
+                raise Exception(f'{node.location}: unknown type {node.type}')
 
         case ast.BinaryOp():
             t1 = typecheck(node.left, symtab)
