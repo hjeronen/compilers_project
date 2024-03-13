@@ -1,8 +1,7 @@
-import operator
-from typing import Any, Callable
+from typing import Any, Callable, Union
 from compiler import ast
-from typing import Union
 from dataclasses import dataclass
+from .symtab import SymTab, find_context, find_top_level_context
 
 
 @dataclass
@@ -14,71 +13,11 @@ class Unit:
 Value = Union[int, bool, None, Unit, Callable]
 
 
-@dataclass
-class SymTab:
-    locals: dict
-    parent: 'SymTab | None'
-
-
-def print_int(i: int) -> None:
-    print(i)
-
-
-def print_bool(value: bool) -> None:
-    if value:
-        print('true')
-    else:
-        print('false')
-
-
-def read_int() -> int:
-    value = input()
-    return int(value)
-
-
-locals = {
-    'print_int': print_int,
-    'print_bool': print_bool,
-    'read_int': read_int,
-    'or': operator.or_,
-    'and': operator.and_,
-    '==': operator.eq,
-    '!=': operator.ne,
-    '<': operator.lt,
-    '<=': operator.le,
-    '>': operator.gt,
-    '>=': operator.ge,
-    '+': operator.add,
-    '-': operator.sub,
-    '*': operator.mul,
-    '/': operator.floordiv,
-    '%': operator.mod,
-    'unary_-': operator.neg,
-    'not': operator.not_
-}
-
-
-def find_top_level_context(symtab: SymTab) -> SymTab:
-    if symtab.parent is not None:
-        return find_top_level_context(symtab.parent)
-    return symtab
-
-
-def find_context(symtab: SymTab, name: str) -> SymTab:
-    if name not in symtab.locals:
-        if symtab.parent is not None:
-            return find_context(symtab.parent, name)
-        else:
-            raise Exception(f'Undefined variable name {name}')
-    else:
-        return symtab
-
-
 def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
     if node is None:
         return None
 
-    context = find_top_level_context(symtab)
+    top_context = find_top_level_context(symtab)
 
     match node:
         case ast.Literal():
@@ -86,25 +25,36 @@ def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
 
         case ast.Identifier():
             context = find_context(symtab, node.name)
-            return context.locals[node.name]
+            if context is not None:
+                return context.locals[node.name]
+            else:
+                raise Exception(f'Undefined variable name {node.name}')
 
         case ast.BinaryOp():
             if node.op == '=':
                 value = interpret(node.right, symtab)
                 if isinstance(node.left, ast.Identifier):
-                    if node.left.name in symtab.locals:
-                        symtab.locals[node.left.name] = value
+                    context = find_context(symtab, node.left.name)
+                    if context is not None:
+                        context.locals[node.left.name] = value
+                        return value
                     else:
-                        parent_context = find_context(symtab, node.left.name)
-                        parent_context.locals[node.left.name] = value
-                    return value
+                        raise Exception(
+                            f'Undefined variable name {node.left.name}')
+
+                    # if node.left.name in symtab.locals:
+                    #     symtab.locals[node.left.name] = value
+                    # else:
+                    #     parent_context = find_context(symtab, node.left.name)
+                    #     parent_context.locals[node.left.name] = value
+
                 else:
                     raise Exception(
                         f'Only identifiers allowed as variable names.')
 
-            elif node.op in context.locals:
+            elif node.op in top_context.locals:
                 a: Any = interpret(node.left, symtab)
-                op = context.locals[node.op]
+                op = top_context.locals[node.op]
 
                 if not callable(op):
                     raise Exception(f'{node.location}: {op} is not a function')
@@ -126,16 +76,16 @@ def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
         case ast.UnaryOp():
             expr = interpret(node.expr, symtab)
             if isinstance(expr, bool):
-                if node.op in context.locals:
-                    op = context.locals[node.op]
+                if node.op in top_context.locals:
+                    op = top_context.locals[node.op]
                     return op(expr)
                 else:
                     raise Exception(
                         f'{node.location}: incompatible operator {node.op} for boolean')
             elif isinstance(expr, int):
                 op = 'unary_' + node.op
-                if op in context.locals:
-                    op = context.locals[op]
+                if op in top_context.locals:
+                    op = top_context.locals[op]
                     return op(expr)
                 else:
                     raise Exception(
@@ -202,8 +152,8 @@ def interpret(node: ast.Expression | None, symtab: SymTab) -> Value:
         case ast.FunctionCall():
             if isinstance(node.name, ast.Identifier):
                 name = node.name.name
-                if name in context.locals:
-                    f = context.locals[name]
+                if name in top_context.locals:  # only built in functions supported for now
+                    f = top_context.locals[name]
                     if not callable(f):
                         raise Exception(
                             f'{node.location}: {f} is not a function')

@@ -1,10 +1,11 @@
 import pytest
 from compiler.tokenizer import tokenize
 from compiler.parser import parse
-from compiler.interpreter import interpret, SymTab, Unit, locals
+from compiler.interpreter import interpret, Unit
+from compiler.symtab import SymTab, interpreter_locals
 from typing import Any
 
-symtab = SymTab(locals=locals, parent=None)
+symtab = SymTab(locals=interpreter_locals, parent=None)
 
 
 def test_interpret_basic_binary_op() -> None:

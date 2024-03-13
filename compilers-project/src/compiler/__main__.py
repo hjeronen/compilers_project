@@ -1,8 +1,9 @@
 import sys
 from .tokenizer import tokenize
 from .parser import parse
-from .interpreter import interpret, SymTab, locals
+from .interpreter import interpret
 from .type_checker import typecheck
+from .symtab import SymTab, interpreter_locals
 
 # TODO(student): add more commands as needed
 usage = f"""
@@ -51,10 +52,11 @@ def main() -> int:
                 print(token)
             tree = parse(tokens)
             print(tree)
-            symtab = SymTab(locals=locals, parent=None)
-            result = interpret(tree, symtab)
+            interpreter_symtab = SymTab(locals=interpreter_locals, parent=None)
+            result = interpret(tree, interpreter_symtab)
             print(result)
-            check_type = typecheck(tree)
+            typechecker_symtab = SymTab(locals={}, parent=None)
+            check_type = typecheck(tree, typechecker_symtab)
             print(check_type)
         ...  # TODO(student)
     else:
