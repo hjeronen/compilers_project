@@ -65,6 +65,7 @@ class Block(Expression):
 @dataclass
 class VarDeclaration(Expression):
     name: Identifier
+    type: Identifier | None
     value: Expression
 
 

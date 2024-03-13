@@ -18,12 +18,52 @@ def test_parsing_variable_declaration() -> None:
             ast.VarDeclaration(
                 location,
                 name=ast.Identifier(location, name='x'),
+                type=None,
                 value=ast.Literal(location, value=123)
             )
         ]
     )
 
     assert parse(input) == expected
+
+
+def test_parsing_typed_var_declaration() -> None:
+    input = tokenize('test', '{ var x: Int = 123 }')
+    expected = ast.Block(
+        location,
+        statements=[
+            ast.VarDeclaration(
+                location,
+                name=ast.Identifier(location, name='x'),
+                type=ast.Identifier(location, name='Int'),
+                value=ast.Literal(location, value=123)
+            )
+        ]
+    )
+
+    assert parse(input) == expected
+
+
+def test_missing_identifier_after_semicolon_raises_exception() -> None:
+    input = tokenize('test', '{ var x: = 3 }')
+    unexpected = input[4]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: expected an identifier'
+    assert str(excep_info.value) == error
+
+
+def test_double_identifier_after_semicolon_raises_exception() -> None:
+    input = tokenize('test', '{ var x: Int Bool = 3 }')
+    unexpected = input[5]
+
+    with pytest.raises(Exception) as excep_info:
+        parse(input)
+
+    error = f'{unexpected.location}: expected "="'
+    assert str(excep_info.value) == error
 
 
 def test_var_only_allowed_on_top_level() -> None:
@@ -42,6 +82,7 @@ def test_top_level_var_without_block_allowed() -> None:
     expected = ast.VarDeclaration(
         location,
         name=ast.Identifier(location, name='x'),
+        type=None,
         value=ast.Literal(location, value=0)
     )
 
@@ -59,6 +100,7 @@ def test_top_level_var_after_block_allowed() -> None:
                     ast.VarDeclaration(
                         location,
                         name=ast.Identifier(location, name='x'),
+                        type=None,
                         value=ast.Literal(location, value=0)
                     )
                 ]
@@ -66,6 +108,7 @@ def test_top_level_var_after_block_allowed() -> None:
             ast.VarDeclaration(
                 location,
                 name=ast.Identifier(location, name='x'),
+                type=None,
                 value=ast.Literal(location, value=0)
             )
         ]
@@ -82,6 +125,7 @@ def test_top_level_var_before_block_allowed() -> None:
             ast.VarDeclaration(
                 location,
                 name=ast.Identifier(location, name='x'),
+                type=None,
                 value=ast.Literal(location, value=0)
             ),
             ast.Block(
@@ -90,6 +134,7 @@ def test_top_level_var_before_block_allowed() -> None:
                     ast.VarDeclaration(
                         location,
                         name=ast.Identifier(location, name='x'),
+                        type=None,
                         value=ast.Literal(location, value=0)
                     )
                 ]
@@ -105,6 +150,7 @@ def test_var_value_can_be_expression() -> None:
     expected = ast.VarDeclaration(
         location,
         name=ast.Identifier(location, name='x'),
+        type=None,
         value=ast.BinaryOp(
             location,
             left=ast.Literal(location, value=0),
