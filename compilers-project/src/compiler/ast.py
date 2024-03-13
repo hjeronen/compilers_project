@@ -45,7 +45,7 @@ class IfStatement(Expression):
 @dataclass
 class FunctionCall(Expression):
     """AST node for function calls"""
-    name: Expression | None
+    name: Identifier | None
     args: list[Expression]
 
 

@@ -19,3 +19,5 @@ Unit = BasicType('Unit')
 @dataclass(frozen=True)
 class FunType(Type):
     """Function types."""
+    args: list[Type]
+    return_type: Type | None
