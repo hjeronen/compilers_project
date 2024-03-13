@@ -2,6 +2,11 @@ from compiler import ast
 from compiler.types import Bool, Int, Type, Unit
 
 
+class SymTab:
+    locals: dict
+    parent: 'SymTab | None'
+
+
 def typecheck(node: ast.Expression | None) -> Type:
     if node is None:
         return Unit
