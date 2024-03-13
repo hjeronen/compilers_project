@@ -156,14 +156,14 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
         location = peek().location
         consume('var')
         name = parse_identifier()
-        type = parse_type_expression()
+        var_type = parse_type_expression()
         consume('=')
         value = parse_expression()
 
         return ast.VarDeclaration(
             location,
             name,
-            type,
+            var_type,
             value
         )
 

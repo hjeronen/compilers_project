@@ -1,11 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from .tokenizer import Location
-
-
-@dataclass
-class Expression:
-    """Base class for AST nodes representing expressions."""
-    location: Location | None
+from .types import Type, Unit
 
 
 @dataclass
@@ -21,6 +16,13 @@ class Int(TypeExpression):
 @dataclass
 class Bool(TypeExpression):
     type: str
+
+
+@dataclass
+class Expression:
+    """Base class for AST nodes representing expressions."""
+    location: Location | None
+    type: Type = field(kw_only=True, default=Unit)
 
 
 @dataclass
@@ -80,7 +82,7 @@ class Block(Expression):
 @dataclass
 class VarDeclaration(Expression):
     name: Identifier
-    type: TypeExpression | None
+    var_type: TypeExpression | None
     value: Expression
 
 

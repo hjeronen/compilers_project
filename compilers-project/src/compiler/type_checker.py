@@ -31,18 +31,18 @@ def typecheck(node: ast.Expression | None, symtab: SymTab) -> Type:
 
             value_type = typecheck(node.value, symtab)
 
-            if node.type is None:
+            if node.var_type is None:
                 symtab.locals[node.name.name] = value_type
                 return value_type
 
-            elif isinstance(node.type, ast.Int):
+            elif isinstance(node.var_type, ast.Int):
                 if value_type != Int:
                     raise Exception(
                         f'{node.location}: type error, expected Int')
                 symtab.locals[node.name.name] = Int
                 return Int
 
-            elif isinstance(node.type, ast.Bool):
+            elif isinstance(node.var_type, ast.Bool):
                 if value_type != Int:
                     raise Exception(
                         f'{node.location}: type error, expected Bool')
