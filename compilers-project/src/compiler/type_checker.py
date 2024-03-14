@@ -1,11 +1,19 @@
 from compiler import ast
 from compiler.types import Bool, Int, Type, Unit, FunType
-from .symtab import SymTab, find_context, find_top_level_context
+from .symtab import SymTab, find_context
 
 
 def typecheck(node: ast.Expression | None, symtab: SymTab) -> Type:
     if node is None:
         return Unit
+
+    node_type = check_node(node, symtab)
+    node.type = node_type
+
+    return node_type
+
+
+def check_node(node: ast.Expression | None, symtab: SymTab) -> Type:
 
     match node:
 
@@ -33,7 +41,7 @@ def typecheck(node: ast.Expression | None, symtab: SymTab) -> Type:
 
             if node.var_type is None:
                 symtab.locals[node.name.name] = value_type
-                return value_type
+                return Unit
 
             elif isinstance(node.var_type, ast.Int):
                 if value_type != Int:

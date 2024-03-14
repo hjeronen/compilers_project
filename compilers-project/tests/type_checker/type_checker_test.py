@@ -1,9 +1,11 @@
 import pytest
+from typing import cast
 from compiler.tokenizer import tokenize
 from compiler.parser import parse
 from compiler.type_checker import typecheck
 from compiler.types import BasicType, Bool, Int, Unit, FunType
 from compiler.symtab import SymTab
+import compiler.ast as ast
 
 
 def test_typecheck_returns_int() -> None:
@@ -78,7 +80,7 @@ def test_if_with_differing_branch_types_raises_exception() -> None:
 
 def test_typechecking_untyped_var_declaration() -> None:
     input = parse(tokenize('test', 'var x = 123'))
-    expected = Int
+    expected = Unit
 
     assert typecheck(input, SymTab(locals={}, parent=None)) == expected
 
@@ -201,3 +203,41 @@ def test_mismatching_types_in_var_dec_raises_exception() -> None:
 
     error = f'{unexpected.location}: type error, expected Int'
     assert str(excep_info.value) == error
+
+
+def test_typechecker_sets_node_type() -> None:
+    input = parse(tokenize(
+        'test',
+        '{ var x: Int = 0; while x < 2 do { if x < 2 then x = x + 1 else x = x + 2 }; x == 1 }'
+    ))
+    input = cast(ast.Block, input)
+    assert input.type == Unit
+
+    # var statement
+    assert input.statements[0].type == Unit
+
+    # while loop
+    while_loop = cast(ast.WhileLoop, input.statements[1])
+    assert while_loop.type == Unit
+
+    # if statement
+    while_block = cast(ast.Block, while_loop.body)
+    if_statement = while_block.statements[0]
+    assert if_statement.type == Unit
+
+    # type checker should change the AST node types
+
+    block_type = typecheck(input, SymTab(locals={}, parent=None))
+    assert block_type == Bool
+
+    # var type
+    assert input.statements[0].type == Int
+
+    # while loop
+    while_loop = cast(ast.WhileLoop, input.statements[1])
+    while_type = while_loop.type
+    assert while_type == Unit
+
+    # if statement
+    while_body = cast(ast.Block, while_loop.body)
+    assert while_body.statements[0].type == Int
