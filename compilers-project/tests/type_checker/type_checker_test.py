@@ -87,7 +87,7 @@ def test_typechecking_untyped_var_declaration() -> None:
 
 def test_typechecking_assignment_types_match() -> None:
     input = parse(tokenize('test', '{ var x = 123; x = 2 }'))
-    expected = Int
+    expected = Unit
 
     assert typecheck(input, SymTab(locals={}, parent=None)) == expected
 
@@ -228,7 +228,7 @@ def test_typechecker_sets_node_type() -> None:
     # type checker should change the AST node types
 
     block_type = typecheck(input, SymTab(locals={}, parent=None))
-    assert block_type == Bool
+    assert block_type == Unit
 
     # var type
     assert input.statements[0].type == Int

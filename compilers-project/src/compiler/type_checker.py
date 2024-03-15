@@ -103,11 +103,15 @@ def check_node(node: ast.Expression | None, symtab: SymTab) -> Type:
                 raise Exception(f'Unknown operator {node.op}')
 
         case ast.UnaryOp():
-            type = typecheck(node.expr, symtab)
-            if type is not Bool:
+            value_type = typecheck(node.expr, symtab)
+
+            if node.op == 'not' and value_type is not Bool:
                 raise Exception(
-                    f'{node.location}: expected type Bool, got {type}')
-            return type
+                    f'{node.location}: expected type Bool, got {value_type}')
+            elif node.op == '-' and value_type is not Int:
+                raise Exception(
+                    f'{node.location}: expected type Int, got {value_type}')
+            return value_type
 
         case ast.IfStatement():
             t1 = typecheck(node.condition, symtab)
@@ -125,15 +129,14 @@ def check_node(node: ast.Expression | None, symtab: SymTab) -> Type:
             return t2
 
         case ast.Block():
-            type = Unit
             context = symtab
             if symtab.parent is not None:
                 context = SymTab(locals={}, parent=symtab)
 
             for statement in node.statements:
-                type = typecheck(statement, context)
+                typecheck(statement, context)
 
-            return type
+            return Unit
 
         case ast.FunctionCall():
             args = []

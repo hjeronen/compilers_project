@@ -14,7 +14,7 @@ class SymTab:
         if name in self.locals:
             return self.locals[name]
         elif self.parent is not None:
-            self.parent.require(name)
+            return self.parent.require(name)
         else:
             return None
 
@@ -79,7 +79,7 @@ root_types: dict[IRVar, Type] = {
     IRVar('*'): Int,
     IRVar('/'): Int,
     IRVar('%'): Int,
-    IRVar('unary_-'): Bool,
+    IRVar('unary_-'): Int,
     IRVar('not'): Bool
 }
 
