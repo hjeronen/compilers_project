@@ -4,11 +4,12 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Type:
     """Base class for types."""
+    name: str
 
 
 @dataclass(frozen=True)
 class BasicType(Type):
-    name: str
+    """Class for Int, Bool and Unit types."""
 
 
 Int = BasicType('Int')

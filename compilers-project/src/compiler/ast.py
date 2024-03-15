@@ -21,7 +21,7 @@ class Bool(TypeExpression):
 @dataclass
 class Expression:
     """Base class for AST nodes representing expressions."""
-    location: Location | None
+    location: Location
     type: Type = field(kw_only=True, default=Unit)
 
 

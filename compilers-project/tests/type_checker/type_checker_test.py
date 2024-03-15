@@ -174,7 +174,7 @@ def test_or_operator_requires_bool() -> None:
 
 def test_typechecking_function_call() -> None:
     input = parse(tokenize('test', 'print_int(1)'))
-    expected = FunType(args=[Int], return_type=Unit)
+    expected = FunType(name='print_int', args=[Int], return_type=Unit)
 
     assert typecheck(input, SymTab(locals={}, parent=None)) == expected
 

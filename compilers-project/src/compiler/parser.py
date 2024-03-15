@@ -1,9 +1,6 @@
 from compiler.tokenizer import Token
 import compiler.ast as ast
 
-# Keep track of the position in the token list in a variable pos.
-# Define a set of parsing functions to parse different kinds of AST subtrees.
-
 
 def parse(tokens: list[Token]) -> ast.Expression | None:
     if len(tokens) == 0:
@@ -116,9 +113,10 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
         )
 
     def parse_function_call() -> ast.FunctionCall:
+        identifier = peek_backwards()
         consume('(')
         f = ast.FunctionCall(
-            location=None,
+            location=identifier.location,
             name=None,
             args=[]
         )
@@ -179,10 +177,6 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             if peek().type == 'end':
                 raise Exception(f'{peek().location}: expected a "}}"')
 
-            # if peek().type == 'keyword' and peek().text == 'var':
-            #     block.statements.append(parse_var_declaration())
-            #     continue
-
             block.statements.append(parse_expression())
             if peek().text == ';':
                 consume(';')
@@ -213,7 +207,6 @@ def parse(tokens: list[Token]) -> ast.Expression | None:
             if peek().text == '(':
                 f = parse_function_call()
                 f.name = identifier
-                f.location = identifier.location
                 return f
 
             return identifier

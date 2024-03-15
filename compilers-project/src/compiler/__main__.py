@@ -3,7 +3,8 @@ from .tokenizer import tokenize
 from .parser import parse
 from .interpreter import interpret
 from .type_checker import typecheck
-from .symtab import SymTab, interpreter_locals
+from .ir_generator import generate_ir
+from .symtab import SymTab, interpreter_locals, root_types
 
 # TODO(student): add more commands as needed
 usage = f"""
@@ -51,6 +52,8 @@ def main() -> int:
             for token in tokens:
                 print(token)
             tree = parse(tokens)
+            if tree is None:
+                raise Exception('AST node was none')
             print(tree)
             interpreter_symtab = SymTab(locals=interpreter_locals, parent=None)
             result = interpret(tree, interpreter_symtab)
@@ -58,6 +61,19 @@ def main() -> int:
             typechecker_symtab = SymTab(locals={}, parent=None)
             check_type = typecheck(tree, typechecker_symtab)
             print(check_type)
+            ir = generate_ir(root_types, tree)
+            print(ir)
+    elif command == 'ir':
+        if input_file:
+            source_code = read_source_code()
+            tokens = tokenize(input_file, source_code)
+            ast_node = parse(tokens)
+            if ast_node is None:
+                raise Exception('AST node was none')
+            typechecker_symtab = SymTab(locals={}, parent=None)
+            typecheck(ast_node, typechecker_symtab)
+            ir_instructions = generate_ir(root_types, ast_node)
+            print('\n'.join([str(ins) for ins in ir_instructions]))
         ...  # TODO(student)
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)

@@ -143,8 +143,8 @@ def check_node(node: ast.Expression | None, symtab: SymTab) -> Type:
                 arg_type = typecheck(arg, symtab)
                 args.append(arg_type)
 
-            fun_type = FunType(args, return_type)
             if node.name is not None:
+                fun_type = FunType(node.name.name, args, return_type)
                 symtab.locals[node.name.name] = fun_type
                 return fun_type
             else:
