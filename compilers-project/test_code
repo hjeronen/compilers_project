@@ -1,1 +1,1 @@
-- 1
+var x = 0; print_int(x)

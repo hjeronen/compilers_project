@@ -217,6 +217,18 @@ def generate_ir(
                     visit(symtab, statement)
                 return var_unit
 
+            case ast.FunctionCall():
+                if expr.name is None:
+                    raise Exception(f'{loc}: function has no name')
+                f_var = st.require(expr.name.name)
+                arg_vars = []
+                for arg in expr.args:
+                    arg_var = visit(st, arg)
+                    arg_vars.append(arg_var)
+                result_var = new_var(Unit)
+                ins.append(ir.Call(loc, f_var, arg_vars, result_var))
+                return result_var
+
             case ast.WhileLoop():
                 l_start = new_label(loc)
                 l_body = new_label(loc)
