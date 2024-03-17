@@ -49,17 +49,13 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
                     intrinsic(args)
                     emit(f'movq %rax, {locals.get_ref(ins.dest)}')
                 else:
+                    registers = ['%rdi', '%rsi', '%rdx', '%rcx', '%r8', '%r9']
                     # compile function call, TODO: other func calls
-                    if ins.fun.name == 'print_int':
-                        # TODO: support more args - map args to registers
-                        # if more than 6 args, use stack, but no need to care about that on this course
-                        assert len(ins.args) == 1
-                        emit(f'movq {locals.get_ref(ins.args[0])}, %rdi')
-                        emit('call print_int')
-                    elif ins.fun.name == 'print_bool':
-                        assert len(ins.args) == 1
-                        emit(f'movq {locals.get_ref(ins.args[0])}, %rdi')
-                        emit('call print_bool')
+                    for i in range(len(ins.args)):
+                        emit(
+                            f'movq {locals.get_ref(ins.args[i])}, {registers[i]}')
+                    emit(f'call {ins.fun.name}')
+                    emit(f'movq %rax, {locals.get_ref(ins.dest)}')
             case ir.Jump():
                 emit(f'jmp .L{ins.label.name}')
             case ir.CondJump():
@@ -67,15 +63,13 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
                 emit(f'jne .L{ins.then_label.name}')
                 emit(f'jmp .L{ins.else_label.name}')
             case ir.Return():
+                emit('movq $0, %rax')  # return 0 to signal end of program
+                emit('movq %rbp, %rsp')  # restore stack registers
+                emit('popq %rbp')
                 emit('ret')
+                emit('')
             case _:
                 raise Exception(f'Unknown instruction: {type(ins)}')
-
-    emit('movq $0, %rax')  # return 0 to signal end of program
-    emit('movq %rbp, %rsp')  # restore stack registers
-    emit('popq %rbp')
-    emit('ret')
-    emit('')
 
     return '\n'.join(assembly_code_lines)
 
