@@ -22,6 +22,8 @@ def check_node(node: ast.Expression | None, symtab: SymTab) -> Type:
                 return Bool
             elif isinstance(node.value, int):
                 return Int
+            elif node.value == None:
+                return Unit
             else:
                 raise Exception(f'Unknown type for literal {node.value}')
 

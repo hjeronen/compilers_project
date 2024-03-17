@@ -4,6 +4,8 @@ from .parser import parse
 from .interpreter import interpret
 from .type_checker import typecheck
 from .ir_generator import generate_ir
+from .assembly_generator import generate_assembly
+from .assembler import assemble
 from .symtab import SymTab, interpreter_locals, root_types
 
 # TODO(student): add more commands as needed
@@ -74,6 +76,33 @@ def main() -> int:
             typecheck(ast_node, typechecker_symtab)
             ir_instructions = generate_ir(root_types, ast_node)
             print('\n'.join([str(ins) for ins in ir_instructions]))
+    elif command == 'asm':
+        if not input_file:
+            input_file = 'no_file'
+        source_code = read_source_code()
+        tokens = tokenize(input_file, source_code)
+        ast_node = parse(tokens)
+        if ast_node is None:
+            raise Exception('AST node was none')
+        typechecker_symtab = SymTab(locals={}, parent=None)
+        typecheck(ast_node, typechecker_symtab)
+        ir_instructions = generate_ir(root_types, ast_node)
+        print('\n'.join([str(ins) for ins in ir_instructions]))
+        print('---------- assembly ----------')
+        asm_code = generate_assembly(ir_instructions)
+        print(asm_code)
+    elif command == 'compile':
+        if input_file:
+            source_code = read_source_code()
+            tokens = tokenize(input_file, source_code)
+            ast_node = parse(tokens)
+            if ast_node is None:
+                raise Exception('AST node was none')
+            typechecker_symtab = SymTab(locals={}, parent=None)
+            typecheck(ast_node, typechecker_symtab)
+            ir_instructions = generate_ir(root_types, ast_node)
+            asm_code = generate_assembly(ir_instructions)
+            assemble(asm_code, 'compiled_program')
         ...  # TODO(student)
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)

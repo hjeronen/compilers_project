@@ -1,1 +1,1 @@
-var x = 0; print_int(x)
+{ var x = true; if x then 1 else 2; }
