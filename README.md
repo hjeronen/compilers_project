@@ -36,7 +36,7 @@ And run an interactive container with:
 
 If running the compiler with Docker, once the interactive shell is open and working, use nano for text editing.
 
-Write code into the file `test_code`, and run command `./compiler.sh compile test_file && ./compiled_program`
+Write code into the file `test_code`, and run command `./compiler.sh compile test_code && ./compiled_program`
 
 Available commands:
 
