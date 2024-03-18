@@ -1,0 +1,2 @@
+input print_bool(not true)
+prints false

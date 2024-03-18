@@ -7,6 +7,7 @@ from .ir_generator import generate_ir
 from .assembly_generator import generate_assembly
 from .assembler import assemble
 from .symtab import SymTab, interpreter_locals, root_types
+from .run_test_programs import check_test_cases
 
 # TODO(student): add more commands as needed
 usage = f"""
@@ -129,6 +130,9 @@ def main() -> int:
         ir_instructions = generate_ir(root_types, ast_node)
         asm_code = generate_assembly(ir_instructions)
         assemble(asm_code, 'compiled_program')
+
+    elif command == 'end':
+        check_test_cases()
 
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)

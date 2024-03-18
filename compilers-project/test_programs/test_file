@@ -1,0 +1,8 @@
+input 1 + 2 * 3
+prints 7
+---
+input 4 / 2
+prints 2
+---
+input print_bool(1<2)
+prints true

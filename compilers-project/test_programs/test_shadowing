@@ -1,4 +1,4 @@
-{
+input {
     var x = 1;
     {
         var x = 2;  # Shadows the 'x' in the outer scope
@@ -7,5 +7,7 @@
         print_int(y);   # Prints 3
     }
     print_int(x);  # Prints 1
-    print_bool(true)
 }
+prints 2
+3
+1

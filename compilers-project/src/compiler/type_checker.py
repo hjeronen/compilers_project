@@ -131,9 +131,7 @@ def check_node(node: ast.Expression | None, symtab: SymTab) -> Type:
             return t2
 
         case ast.Block():
-            context = symtab
-            if symtab.parent is not None:
-                context = SymTab(locals={}, parent=symtab)
+            context = SymTab(locals={}, parent=symtab)
 
             for statement in node.statements:
                 typecheck(statement, context)

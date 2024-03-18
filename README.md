@@ -34,13 +34,22 @@ And run an interactive container with:
 
 ## Running code on the compiler
 
-If running the compiler with Docker, once the interactive shell is open and working, install nano with `apt-get install nano` for text editing.
+If running the compiler with Docker, once the interactive shell is open and working, use nano for text editing.
 
 Write code into the file `test_code`, and run command `./compiler.sh compile test_file && ./compiled_program`
 
+Available commands:
+
+- `test_prints` prints out the results from each compiler stage for given test code
+- `interpret`runs the interpreter and the typechecker, and prints out results from both
+- `ir`runs the IR generator and prints out the commands
+- `asm`runs the assembly generator and prints out the assembly instructions
+- `compile`compiles the given test code into file 'compiled_program'
+- `end`runs the end-to-end test cases, defined in directory 'test_programs'
+
 Check language syntax from [the course page](https://hy-compilers.github.io/spring-2024/language-spec/).
 
-To run tests, use command `./check.sh`.
+To run unit tests (for tokenizer, parser, interpreter and typechecker), use command `./check.sh`.
 
 ## Notes
 
@@ -49,5 +58,8 @@ To run tests, use command `./check.sh`.
 - Above error will still exist if PYTHONPATH is not set to '/compilers-project/src'
 
 - To check and set PYTHONPATH run:
+
   - `echo $PYTHONPATH`
   - `export PYTHONPATH="/compilers-project/src"`
+
+- For some reason, during manual testing variables are saved in symtab, but in end-to-end tests they are saved to root_types - not sure why, fixed by copying root_types separately for each test case

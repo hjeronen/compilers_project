@@ -212,7 +212,7 @@ def generate_ir(
                 return var_unit
 
             case ast.Block():
-                symtab = SymTab(locals=root_types, parent=st)
+                symtab = SymTab(locals={}, parent=st)
                 for statement in expr.statements:
                     visit(symtab, statement)
                 return var_unit
@@ -257,7 +257,10 @@ def generate_ir(
     # they just need to exist.
     root_symtab = SymTab(locals={str: IRVar}, parent=None)
     for v in root_types.keys():
-        root_symtab.add_local(v.name, v)
+        if type(v) == str:
+            root_symtab.add_local(v, v)
+        else:
+            root_symtab.add_local(v.name, v)
 
     ins.append(ir.Label(root_expr.location, 'start'))
 

@@ -80,7 +80,7 @@ root_types: dict[IRVar, Type] = {
     IRVar('/'): Int,
     IRVar('%'): Int,
     IRVar('unary_-'): Int,
-    IRVar('not'): Bool
+    IRVar('unary_not'): Bool
 }
 
 

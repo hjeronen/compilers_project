@@ -1,0 +1,24 @@
+input {
+	var x: Int = 0;
+	while x < 5
+	do {
+			x = x + 1
+		}
+	print_int(x)
+}
+prints 5
+---
+input {
+	var x = 1;
+	if true
+	then x = x + 2
+	else x = x + 3;
+	print_int(x)
+}
+prints 3
+---
+input {
+	if not false
+	then print_bool(true)
+}
+prints true

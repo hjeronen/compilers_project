@@ -40,8 +40,6 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
                 emit(f'movq {locals.get_ref(ins.source)}, %rax')
                 emit(f'movq %rax, {locals.get_ref(ins.dest)}')
             case ir.Call():
-                # some calls need to be translated to function calls
-                # others operators, need special handling - called intrinsics
                 if (intrinsic := all_intrinsics.get(ins.fun.name)) is not None:
                     args = IntrinsicArgs(
                         arg_refs=[locals.get_ref(arg) for arg in ins.args],
