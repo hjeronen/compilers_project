@@ -1,8 +1,8 @@
 import operator
 from dataclasses import dataclass
 from typing import Any
-from compiler.types import Bool, Int, FunType, Type, Unit
-from compiler.ir import IRVar
+from .type_definitions import Bool, Int, Type, Unit
+from .ir import IRVar
 
 
 @dataclass

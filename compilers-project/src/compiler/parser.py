@@ -1,5 +1,5 @@
-from compiler.tokenizer import Token
-import compiler.ast as ast
+from .tokenizer import Token
+from . import ast
 
 
 def parse(tokens: list[Token]) -> ast.Expression | None:

@@ -1,8 +1,8 @@
-from compiler import ast, ir
-from compiler.symtab import SymTab
-from compiler.types import Bool, Int, Type, Unit
-from compiler.ir import IRVar
-from compiler.tokenizer import Location
+from . import ast, ir
+from .symtab import SymTab
+from .type_definitions import Bool, Int, Type, Unit
+from .ir import IRVar
+from .tokenizer import Location
 
 
 def generate_ir(
@@ -278,7 +278,7 @@ def generate_ir(
             [var_final_result],
             new_var(Bool)
         ))
-    elif var_types[var_final_result] == Unit:
-        ins.append(ir.Return(root_expr.location))
+
+    ins.append(ir.Return(root_expr.location))
 
     return ins

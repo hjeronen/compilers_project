@@ -1,6 +1,6 @@
 import dataclasses
-from compiler import ir
-from compiler.intrinsics import all_intrinsics, IntrinsicArgs
+from . import ir
+from .intrinsics import all_intrinsics, IntrinsicArgs
 
 
 def generate_assembly(instructions: list[ir.Instruction]) -> str:
@@ -13,6 +13,8 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
     emit('.global main')
     emit('.type main, @function')
     emit('.extern print_int')
+    emit('.extern print_bool')
+    emit('.extern read_int')
 
     emit('.section .text')
     emit('main:')
@@ -26,7 +28,7 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
 
         match ins:
             case ir.Label():
-                emit(f'.L{ins.name}:')
+                emit(f'.{ins.name}:')
             case ir.LoadIntConst():
                 emit(f'movq ${ins.value}, {locals.get_ref(ins.dest)}')
                 # does not work if value more than 32 bits
@@ -57,11 +59,11 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
                     emit(f'call {ins.fun.name}')
                     emit(f'movq %rax, {locals.get_ref(ins.dest)}')
             case ir.Jump():
-                emit(f'jmp .L{ins.label.name}')
+                emit(f'jmp .{ins.label.name}')
             case ir.CondJump():
                 emit(f'cmpq $0, {locals.get_ref(ins.cond)}')
-                emit(f'jne .L{ins.then_label.name}')
-                emit(f'jmp .L{ins.else_label.name}')
+                emit(f'jne .{ins.then_label.name}')
+                emit(f'jmp .{ins.else_label.name}')
             case ir.Return():
                 emit('movq $0, %rax')  # return 0 to signal end of program
                 emit('movq %rbp, %rsp')  # restore stack registers
@@ -105,7 +107,7 @@ class Locals:
         self._stack_used = 8
         for v in variables:
             if v not in self._var_to_location:
-                self._var_to_location[v] = f'-{self._stack_used}%(rbp)'
+                self._var_to_location[v] = f'-{self._stack_used}(%rbp)'
                 self._stack_used += 8
 
     def get_ref(self, v: ir.IRVar) -> str:

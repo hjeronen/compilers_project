@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 debian:12
 
-RUN apt-get update \
+RUN apt-get update --fix-missing \
 && apt-get install -y build-essential python3 curl git zlib1g-dev libssl-dev libbz2-dev libffi-dev libreadline-dev liblzma-dev libsqlite3-dev \
 && apt-get clean
 
@@ -11,13 +11,15 @@ RUN curl https://pyenv.run | bash \
 && echo 'source ~/.bash_python_setup' >> ~/.bashrc \
 && echo 'source ~/.bash_python_setup' >> ~/.profile
 
-COPY .python-version /project/
-RUN cd /project && bash -lc 'pyenv install'
+COPY .python-version /compilers-project/
+RUN cd /compilers-project && bash -lc 'pyenv install'
 
 RUN curl -sSL https://install.python-poetry.org | python3 - \
 && echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_python_setup
 
-COPY pyproject.toml poetry.lock /project
-RUN cd /project && bash -lc 'poetry install' && rm -Rf /project && mkdir -p /project
+COPY pyproject.toml poetry.lock /compilers-project
+RUN cd /compilers-project && bash -lc 'poetry install' && rm -Rf /compilers-project && mkdir -p /compilers-project
 
-WORKDIR /project
+ENV PYTHONPATH="/compilers-project/src"
+
+WORKDIR /compilers-project

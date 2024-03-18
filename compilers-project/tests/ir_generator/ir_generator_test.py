@@ -18,7 +18,8 @@ def test_generate_ir_works() -> None:
         'LoadIntConst(3, x3)',
         'Call(*, [x2, x3], x4)',
         'Call(+, [x1, x4], x5)',
-        'Call(print_int, [x5], x6)'
+        'Call(print_int, [x5], x6)',
+        'Return()'
     ]
 
     ir_instructions = generate_ir(root_types, input)

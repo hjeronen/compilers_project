@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from .tokenizer import Location
-from .types import Type, Unit
+from .type_definitions import Type, Unit
 
 
 @dataclass

@@ -3,7 +3,7 @@ from typing import cast
 from compiler.tokenizer import tokenize
 from compiler.parser import parse
 from compiler.type_checker import typecheck
-from compiler.types import BasicType, Bool, Int, Unit, FunType
+from compiler.type_definitions import BasicType, Bool, Int, Unit, FunType
 from compiler.symtab import SymTab
 import compiler.ast as ast
 

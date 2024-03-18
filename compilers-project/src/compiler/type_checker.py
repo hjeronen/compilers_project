@@ -1,5 +1,5 @@
-from compiler import ast
-from compiler.types import Bool, Int, Type, Unit, FunType
+from . import ast
+from .type_definitions import Bool, Int, Type, Unit, FunType
 from .symtab import SymTab, find_context
 
 

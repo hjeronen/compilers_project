@@ -1,5 +1,5 @@
 from typing import Any, Callable, Union
-from compiler import ast
+from . import ast
 from dataclasses import dataclass
 from .symtab import SymTab, find_context, find_top_level_context
 

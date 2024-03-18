@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import dataclasses
-from compiler.tokenizer import Location
+from .tokenizer import Location
 from typing import Any
 
 

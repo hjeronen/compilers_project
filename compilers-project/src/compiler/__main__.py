@@ -47,38 +47,55 @@ def main() -> int:
         print(f"Error: command argument missing\n\n{usage}", file=sys.stderr)
         return 1
 
-    if command == 'interpret':
+    if input_file is None:
+        input_file = 'no_file'
+
+    if command == 'test_prints':
         source_code = read_source_code()
-        if input_file:
-            tokens = tokenize(input_file, source_code)
-            for token in tokens:
-                print(token)
-            tree = parse(tokens)
-            if tree is None:
-                raise Exception('AST node was none')
-            print(tree)
-            interpreter_symtab = SymTab(locals=interpreter_locals, parent=None)
-            result = interpret(tree, interpreter_symtab)
-            print(result)
-            typechecker_symtab = SymTab(locals={}, parent=None)
-            check_type = typecheck(tree, typechecker_symtab)
-            print(check_type)
-            ir = generate_ir(root_types, tree)
-            print(ir)
+
+        print('------- Tokens --------')
+        tokens = tokenize(input_file, source_code)
+        for token in tokens:
+            print(token)
+
+        print('------- AST --------')
+        ast_node = parse(tokens)
+        if ast_node is None:
+            raise Exception('AST node was none')
+        print(ast_node)
+
+        print('------- Interpreter --------')
+        interpreter_symtab = SymTab(locals=interpreter_locals, parent=None)
+        result = interpret(ast_node, interpreter_symtab)
+        print(result)
+
+        print('------- Typechecker --------')
+        typechecker_symtab = SymTab(locals={}, parent=None)
+        check_type = typecheck(ast_node, typechecker_symtab)
+        print(check_type)
+
+        print('------- IR --------')
+        ir = generate_ir(root_types, ast_node)
+        print('\n'.join([str(ins) for ins in ir]))
+
+        print('------- Assembly --------')
+        asm_code = generate_assembly(ir)
+        print(asm_code)
+
+    elif command == 'interpret':
+        source_code = read_source_code()
+        tokens = tokenize(input_file, source_code)
+        ast_node = parse(tokens)
+        if ast_node is None:
+            raise Exception('AST node was none')
+        interpreter_symtab = SymTab(locals=interpreter_locals, parent=None)
+        result = interpret(ast_node, interpreter_symtab)
+        print(result)
+        typechecker_symtab = SymTab(locals={}, parent=None)
+        check_type = typecheck(ast_node, typechecker_symtab)
+        print(check_type)
+
     elif command == 'ir':
-        if input_file:
-            source_code = read_source_code()
-            tokens = tokenize(input_file, source_code)
-            ast_node = parse(tokens)
-            if ast_node is None:
-                raise Exception('AST node was none')
-            typechecker_symtab = SymTab(locals={}, parent=None)
-            typecheck(ast_node, typechecker_symtab)
-            ir_instructions = generate_ir(root_types, ast_node)
-            print('\n'.join([str(ins) for ins in ir_instructions]))
-    elif command == 'asm':
-        if not input_file:
-            input_file = 'no_file'
         source_code = read_source_code()
         tokens = tokenize(input_file, source_code)
         ast_node = parse(tokens)
@@ -88,25 +105,35 @@ def main() -> int:
         typecheck(ast_node, typechecker_symtab)
         ir_instructions = generate_ir(root_types, ast_node)
         print('\n'.join([str(ins) for ins in ir_instructions]))
-        print('---------- assembly ----------')
+
+    elif command == 'asm':
+        source_code = read_source_code()
+        tokens = tokenize(input_file, source_code)
+        ast_node = parse(tokens)
+        if ast_node is None:
+            raise Exception('AST node was none')
+        typechecker_symtab = SymTab(locals={}, parent=None)
+        typecheck(ast_node, typechecker_symtab)
+        ir_instructions = generate_ir(root_types, ast_node)
         asm_code = generate_assembly(ir_instructions)
         print(asm_code)
+
     elif command == 'compile':
-        if input_file:
-            source_code = read_source_code()
-            tokens = tokenize(input_file, source_code)
-            ast_node = parse(tokens)
-            if ast_node is None:
-                raise Exception('AST node was none')
-            typechecker_symtab = SymTab(locals={}, parent=None)
-            typecheck(ast_node, typechecker_symtab)
-            ir_instructions = generate_ir(root_types, ast_node)
-            asm_code = generate_assembly(ir_instructions)
-            assemble(asm_code, 'compiled_program')
-        ...  # TODO(student)
+        source_code = read_source_code()
+        tokens = tokenize(input_file, source_code)
+        ast_node = parse(tokens)
+        if ast_node is None:
+            raise Exception('AST node was none')
+        typechecker_symtab = SymTab(locals={}, parent=None)
+        typecheck(ast_node, typechecker_symtab)
+        ir_instructions = generate_ir(root_types, ast_node)
+        asm_code = generate_assembly(ir_instructions)
+        assemble(asm_code, 'compiled_program')
+
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
         return 1
+
     return 0
 
 
