@@ -63,3 +63,5 @@ To run unit tests (for tokenizer, parser, interpreter and typechecker), use comm
     - `export PYTHONPATH="/compilers-project/src"`
 
 - For some reason, during manual testing variables are saved in symtab, but in end-to-end tests they are saved to root_types - not sure why, fixed by copying root_types separately for each test case
+
+- I forgot to add handling for ints that require more than 8 bits to store
