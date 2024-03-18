@@ -2,18 +2,19 @@
 
 Project work for the course [Compilers spring 2024](https://hy-compilers.github.io/spring-2024/).
 
-
 ## Running the project
 
-The compiler is designed to produce x86-64 Linux assembly code. To run it on other kind of systems, the project uses a Dockerfile.
+The compiler is designed to produce x86-64 Linux assembly code. To run it on other kind of systems, the project uses a Dockerfile. Note that there are separate dockerfiles for development and for running the container without volumes.
+
+### For development
 
 Assuming Docker is installed and project files are downloaded, the interactive linux shell can be started from the root directory with:
 
-`docker build -t compilers-dev:latest . && docker run -it --rm -v .:/compilers-project compilers-dev:latest`
+`docker build -f Dockerfile.dev -t compilers-dev:latest . && docker run -it --rm -v .:/compilers-project compilers-dev:latest`
 
 In case there is a warning about incompatible image's platform, try the following command instead (running the Dockerfile on MacBook with M-chip requires defining the platform, although app still shows warning):
 
-`docker build --platform linux/amd64 -t compilers-dev:latest . && docker run --platform linux/amd64 -it --rm -v .:/compilers-project compilers-dev:latest`
+`docker build --platform linux/amd64 -f Dockerfile.dev -t compilers-dev:latest . && docker run --platform linux/amd64 -it --rm -v .:/compilers-project compilers-dev:latest`
 
 Make sure Docker does not try to load old build from cache. For making a fresh build, remove old image, containers, and builds (e.g. from app) and use flag `--no-cache` or run `docker builder prune` to clean up build cache (WARNING: removes all builds from cache).
 
@@ -21,6 +22,15 @@ For more trouble shooting check Notes below.
 
 To exit the session, press `ctrl+d`.
 
+### For standalone container
+
+To run without volume binding, build image with:
+
+`docker build --platform linux/amd64 -f Dockerfile.compiler -t compilers-project:latest .`
+
+And run an interactive container with:
+
+`docker run --platform linux/amd64 -it --rm compilers-project:latest`
 
 ## Running code on the compiler
 
@@ -31,7 +41,6 @@ Write code into the file `test_code`, and run command `./compiler.sh compile tes
 Check language syntax from [the course page](https://hy-compilers.github.io/spring-2024/language-spec/).
 
 To run tests, use command `./check.sh`.
-
 
 ## Notes
 

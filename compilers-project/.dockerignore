@@ -1,4 +1,5 @@
 asmprogram
+compiled_program
 *.pyc
 **/__pycache__
 **/.mypy_cache
